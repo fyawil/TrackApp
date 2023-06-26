@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Print Table</title>
+</head>
+<body>
+    <form method="post" action="{% url 'index' %}">
+        {% csrf_token %}
+        <input type="text" name="table_name" placeholder="Enter table name">
+        <button type="submit">Create Table</button>
+    </form>
+
+    <form method="get" action="{% url 'index' %}">
+        {% csrf_token %}
+        <button type="submit">Print Table</button>
+    </form>
+
+    {% if table_data %}
+        <h2>Table Data:</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in table_data %}
+                    <tr>
+                        <td>{{ row.0 }}</td>
+                        <td>{{ row.1 }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</body>
+</html>
