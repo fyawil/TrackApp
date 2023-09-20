@@ -2,10 +2,9 @@ import React from "react";
 import { StyleSheet, Text, View, StatusBar, Pressable } from "react-native";
 
 export default function HomeScreen({ navigation }) {
-
-    const handleStartPress = () => {
-        navigation.navigate('Record'); // Navigate to the RecordScreen
-      };
+  const handleStartPress = () => {
+    navigation.navigate("Record"); // Navigate to the RecordScreen
+  };
 
   return (
     <View style={styles.container}>
@@ -16,14 +15,13 @@ export default function HomeScreen({ navigation }) {
       </View>
       <View style={styles.homePageBody}>
         <View style={styles.quoteView}>
-          <Text style={styles.quote}>"What gets measured gets improved"</Text>          
+          <Text style={styles.quote}>"What gets measured gets improved"</Text>
         </View>
         <View style={styles.startButtonView}>
           <Pressable style={styles.startButton} onPress={handleStartPress}>
             <Text style={{ color: "black", fontSize: 24 }}>START</Text>
-          </Pressable>          
+          </Pressable>
         </View>
-
       </View>
       <View style={styles.homePageBottom}>
         <View style={styles.contactUsView}>
@@ -49,7 +47,7 @@ const styles = StyleSheet.create({
     height: "10%",
   },
   logoView: {
-    width: "1000%",
+    width: "100%",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -68,7 +66,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-  },  
+  },
   quote: {
     color: "white",
     fontSize: 48,
@@ -79,7 +77,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-  }, 
+  },
   startButton: {
     backgroundColor: "white",
     padding: 20,
@@ -99,5 +97,6 @@ const styles = StyleSheet.create({
   },
   contact: {
     fontSize: 24,
+    textDecorationLine: "line-through",
   },
 });

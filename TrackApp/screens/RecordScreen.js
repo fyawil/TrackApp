@@ -2,13 +2,9 @@ import React from "react";
 import { StyleSheet, Text, View, StatusBar, Pressable } from "react-native";
 
 export default function RecordScreen({ navigation }) {
-
-    const handleBackPress = () => {
-        navigation.navigate('Home'); // Navigate to the HomeScreen
-    }
-    // const handleStartPress = () => {
-    //     navigation.navigate('Record'); // Navigate to the SignInScreen
-    //   };
+  const handleRecordLift = () => {
+    navigation.navigate("RecordLift"); // Navigate to the RecordLiftScreen
+  };
 
   return (
     <View style={styles.container}>
@@ -16,22 +12,32 @@ export default function RecordScreen({ navigation }) {
         <View style={styles.logoView}>
           <Text style={styles.logo}>TRACK APP</Text>
         </View>
-        <View style={styles.backButtonView}>
-          <Pressable style={styles.backButton} onPress={handleBackPress}>
-            <Text style={{ color: "white" }}>Back</Text>
-          </Pressable>
-        </View>
       </View>
       <View style={styles.homePageBody}>
-        <View style={styles.quoteView}>
-          <Text style={styles.quote}>"What gets measured gets improved"</Text>          
+        <View style={styles.topQuoteView}>
+          <Text style={styles.topQuote}>Ingrain Grit</Text>
         </View>
-        <View style={styles.startButtonView}>
-          <Pressable style={styles.startButton}>
-            <Text style={{ color: "black", fontSize: 24 }}>START</Text>
-          </Pressable>          
+        <View style={styles.recordLiftButtonView}>
+          <Pressable style={styles.recordLiftButton} onPress={handleRecordLift}>
+            <Text style={{ color: "black", fontSize: 24 }}>Record Lift</Text>
+          </Pressable>
         </View>
-
+        <View style={styles.orView}>
+          <Text style={{ color: "white", fontSize: 24 }}>Or</Text>          
+        </View>
+        <View style={styles.recordRunButtonView}>
+          <Pressable style={styles.recordRunButton}>
+            <Text style={{ color: "black", fontSize: 24, textDecorationLine: "line-through", }}>Record Run</Text>
+          </Pressable>
+        </View>
+        <View style={styles.bottomQuoteView}>
+          <Text style={styles.bottomQuote}>Master The Mechanics</Text>
+        </View>
+      </View>
+      <View style={styles.homePageBottom}>
+        <View style={styles.contactUsView}>
+          <Text style={styles.contact}>Contact Us</Text>
+        </View>
       </View>
       <StatusBar style="auto" />
     </View>
@@ -52,55 +58,86 @@ const styles = StyleSheet.create({
     height: "10%",
   },
   logoView: {
-    width: "50%",
-    height: "100%",
+    width: "100%",
     alignItems: "center",
     justifyContent: "center",
   },
   logo: {
     fontSize: 24,
   },
-  backButtonView: {
-    width: "25%",
-    height: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  backButton: {
-    backgroundColor: "black",
-    height: "50%",
-    width: "75%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   homePageBody: {
     display: "flex",
     flexDirection: "column",
     backgroundColor: "black",
-    height: "90%",
+    height: "80%",
     width: "100%",
   },
-  quoteView: {
-    height: "60%",
+  topQuoteView: {
+    height: "20%",
     width: "100%",
-    alignItems: "center",
+    alignItems: "right",
     justifyContent: "center",
-  },  
-  quote: {
+  },
+  topQuote: {
     color: "white",
-    fontSize: 48,
-    textAlign: "center",
+    fontSize: 24,
+    textAlign: "right",
   },
-  startButtonView: {
-    height: "40%",
+  recordLiftButtonView: {
+    height: "20%",
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-  }, 
-  startButton: {
+  },
+  recordLiftButton: {
     backgroundColor: "white",
     padding: 20,
     alignItems: "center",
     justifyContent: "center",
   },
+  orView: {
+    height: "20%",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  recordRunButtonView: {
+    height: "20%",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  recordRunButton: {
+    backgroundColor: "white",
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bottomQuoteView: {
+    height: "20%",
+    width: "100%",
+    alignItems: "left",
+    justifyContent: "center",
+  },
+  bottomQuote: {
+    color: "white",
+    fontSize: 24,
+    textAlign: "left",
+  },
+  homePageBottom: {
+    display: "flex",
+    flexDirection: "row",
+    backgroundColor: "white",
+    height: "10%",
+  },
+  contactUsView: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  contact: {
+    fontSize: 24,
+    textDecorationLine: "line-through",
+  },
 });
+
