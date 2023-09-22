@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, StatusBar, Pressable, TextInput } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function RecordLiftScreen({ navigation }) {
   const [exercise, setExerciseText] = useState('');
@@ -8,6 +9,69 @@ export default function RecordLiftScreen({ navigation }) {
   const [year, setYearText] = useState('');
   const [weight, setWeightText] = useState('');
   const [reps, setRepsText] = useState('');
+  const [records, setRecords] = useState([]);
+  const [showRecords, setShowRecords] = useState(false);
+
+  useEffect(() => {
+    loadRecords();
+  }, []);
+
+  const loadRecords = async () => {
+    try {
+      const savedRecords = await AsyncStorage.getItem('liftRecords');
+      if (savedRecords !== null) {
+        setRecords(JSON.parse(savedRecords));
+      }
+    } catch (error) {
+      console.error('Error loading records:', error);
+    }
+  };
+
+  const saveRecords = async () => {
+    try {
+      await AsyncStorage.setItem('liftRecords', JSON.stringify(records));
+    } catch (error) {
+      console.error('Error saving records:', error);
+    }
+  };
+
+  const handleAddRecord = () => {
+    const newRecord = {
+      exercise,
+      date: `${day}/${month}/${year}`,
+      weight,
+      reps,
+    };
+
+    setRecords([...records, newRecord]);
+
+    setExerciseText('');
+    setDayText('');
+    setMonthText('');
+    setYearText('');
+    setWeightText('');
+    setRepsText('');
+
+    saveRecords();
+  };
+
+  const renderRecords = () => {
+    if (showRecords) {
+      return (
+        <View>
+          {records.map((record, index) => (
+            <View key={index}>
+              <Text style={styles.whiteText}>Exercise: {record.exercise}</Text>
+              <Text style={styles.whiteText}>Date: {record.date}</Text>
+              <Text style={styles.whiteText}>Weight: {record.weight}</Text>
+              <Text style={styles.whiteText}>Reps: {record.reps}</Text>
+            </View>
+          ))}
+        </View>
+      );
+    }
+    return null;
+  };
 
   return (
     <View style={styles.container}>
@@ -61,9 +125,13 @@ export default function RecordLiftScreen({ navigation }) {
           placeholder="reps"
           placeholderTextColor="grey"
         />
-        <Pressable style={styles.addSetButton}>
+        <Pressable style={styles.addSetButton} onPress={handleAddRecord}>
           <Text style={{ textAlign: "center", fontSize: 24 }}>+</Text>
         </Pressable>
+        <Pressable style={styles.showRecordsButton} onPress={() => setShowRecords(!showRecords)}>
+          <Text style={{ textAlign: "center", fontSize: 24 }}>Show Records</Text>
+        </Pressable>
+        {renderRecords()}
       </View>
       <View style={styles.homePageBottom}>
         <View style={styles.contactUsView}>
@@ -87,8 +155,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     height: "10%",
   },
-
-
   logoView: {
     width: "100%",
     alignItems: "center",
@@ -114,51 +180,51 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   inputDay: {
-    width: '30%', // Adjust the width as needed
-    height: "100%", // Adjust the height as needed
-    backgroundColor: 'white', // Set the background color to white
-    borderRadius: 5, // Add border radius for a rounded look
-    color: 'black', // Set the text color
+    width: '30%',
+    height: "100%",
+    backgroundColor: 'white',
+    borderRadius: 5,
+    color: 'black',
     textAlign: "center",
   },
   inputMonth: {
-    width: '30%', // Adjust the width as needed
-    height: "100%", // Adjust the height as needed
-    backgroundColor: 'white', // Set the background color to white
-    borderRadius: 5, // Add border radius for a rounded look
-    color: 'black', // Set the text color
+    width: '30%',
+    height: "100%",
+    backgroundColor: 'white',
+    borderRadius: 5,
+    color: 'black',
     textAlign: "center",
   },
   inputYear: {
-    width: '30%', // Adjust the width as needed
-    height: "100%", // Adjust the height as needed
-    backgroundColor: 'white', // Set the background color to white
-    borderRadius: 5, // Add border radius for a rounded look
-    color: 'black', // Set the text color
+    width: '30%',
+    height: "100%",
+    backgroundColor: 'white',
+    borderRadius: 5,
+    color: 'black',
     textAlign: "center"
   },
   inputExercise: {
-    width: '50%', // Adjust the width as needed
-    height: "10%", // Adjust the height as needed
-    backgroundColor: 'white', // Set the background color to white
-    borderRadius: 5, // Add border radius for a rounded look
-    color: 'black', // Set the text color
+    width: '50%',
+    height: "10%",
+    backgroundColor: 'white',
+    borderRadius: 5,
+    color: 'black',
     textAlign: "center"
   },
   inputWeight: {
-    width: '50%', // Adjust the width as needed
-    height: "10%", // Adjust the height as needed
-    backgroundColor: 'white', // Set the background color to white
-    borderRadius: 5, // Add border radius for a rounded look
-    color: 'black', // Set the text color
+    width: '50%',
+    height: "10%",
+    backgroundColor: 'white',
+    borderRadius: 5,
+    color: 'black',
     textAlign: "center",
   },
   inputReps: {
-    width: '50%', // Adjust the width as needed
-    height: "10%", // Adjust the height as needed
-    backgroundColor: 'white', // Set the background color to white
-    borderRadius: 5, // Add border radius for a rounded look
-    color: 'black', // Set the text color
+    width: '50%',
+    height: "10%",
+    backgroundColor: 'white',
+    borderRadius: 5,
+    color: 'black',
     textAlign: "center",
   },
   addSetButton: {
@@ -166,6 +232,15 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 5,
     justifyContent: "center",
+  },
+  showRecordsButton: {
+    padding: 15,
+    backgroundColor: "white",
+    borderRadius: 5,
+    justifyContent: "center",
+  },
+  whiteText: {
+    color: 'white',
   },
   homePageBottom: {
     display: "flex",
