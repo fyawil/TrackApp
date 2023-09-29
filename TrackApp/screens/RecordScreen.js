@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, StatusBar, Pressable } from "react-native";
 
 export default function RecordScreen({ navigation }) {
   const handleRecordLift = () => {
-    navigation.navigate("SignIn"); // Navigate to the RecordLiftScreen
+    navigation.navigate("RecordLift"); // Navigate to the RecordLiftScreen
   };
 
   return (
