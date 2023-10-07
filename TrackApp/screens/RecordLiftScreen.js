@@ -7,20 +7,31 @@ export default function RecordLiftScreen({ navigation }) {
     const db = SQLite.openDatabase('trackLog.db');
     const [isLoading, setIsLoading] = useState(true); 
 
-    const [currentDay, setCurrentDay] = useState(undefined);
-    const [currentMonth, setCurrentMonth] = useState(undefined);
-    const [currentYear, setCurrentYear] = useState(undefined);
+    const day = new Date().getDate()
+    const [currentDay, setCurrentDay] = useState(`${day}`);  
+    const [currentDayPlaceholderColor, setCurrentDayPlaceholderColor] = useState("grey")
+
+    const month = new Date().getMonth() + 1
+    const [currentMonth, setCurrentMonth] = useState(`${month}`);  
+    const [currentMonthPlaceholderColor, setCurrentMonthPlaceholderColor] = useState("grey")
+
+    const year = new Date().getFullYear()
+    const [currentYear, setCurrentYear] = useState(`${year}`);
+    const [currentYearPlaceholderColor, setCurrentYearPlaceholderColor] = useState("grey")
 
     const [currentExercise, setCurrentExercise] = useState(undefined);
+    const [currentExercisePlaceholderColor, setCurrentExercisePlaceholderColor] = useState("grey")
 
     const [currentWeight, setCurrentWeight] = useState(undefined);
+    const [currentWeightPlaceholderColor, setCurrentWeightPlaceholderColor] = useState("grey")
 
     const [currentReps, setCurrentReps] = useState(undefined);
+    const [currentRepsPlaceholderColor, setCurrentRepsPlaceholderColor] = useState("grey")
 
     useEffect(() => {
 
       db.transaction(tx => {
-        tx.executeSql('CREATE TABLE IF NOT EXISTS sets (id INTEGER PRIMARY KEY AUTOINCREMENT, day INTEGER, month INTEGER, year INTEGER, exercise TEXT, weight INTEGER, reps INTEGER)')
+        tx.executeSql('CREATE TABLE IF NOT EXISTS sets (id INTEGER PRIMARY KEY AUTOINCREMENT, day INTEGER, month INTEGER, year INTEGER, exercise TEXT, weight REAL, reps INTEGER)')
       });
   
       setIsLoading(false);
@@ -33,9 +44,78 @@ export default function RecordLiftScreen({ navigation }) {
         </View>
       );
     }
+
+    const isDayValid = () => {
+      if((/[^0-9]/).test(currentDay)) {
+        setCurrentDay("");
+        setCurrentDayPlaceholderColor("red");
+        return false
+      }
+      if(+currentDay < 1) {
+        setCurrentDay("")
+        setCurrentDayPlaceholderColor("red");
+        return false
+      }
+      if(+currentDay > 31) {
+        setCurrentDay("")
+        setCurrentDayPlaceholderColor("red");
+        return false
+      }
+      return true
+    }
+
+    const isMonthValid = () => {
+      if(currentMonth == "ivm") {
+        setCurrentMonth("")
+        setCurrentMonthPlaceholderColor("red");
+        return false
+      }
+      return true
+    }
+
+    const isYearValid = () => {
+      if(currentYear = "ivy") {
+        setCurrentYear("")
+        setCurrentYearPlaceholderColor("red");
+        return false
+      }
+      return true
+    }
+
+    const isExerciseValid = () => {
+      if(currentExercise == "ive") {
+        setCurrentExercise("")
+        setCurrentExercisePlaceholderColor("red");
+        return false
+      }
+      return true
+    }
+
+    const isWeightValid = () => {
+      if(currentWeight == "ivw") {
+        setCurrentWeight("")
+        setCurrentWeightPlaceholderColor("red");
+        return false
+      }
+      return true
+    }
+
+    const isRepsValid = () => {
+      if(currentReps == "ivr") {
+        setCurrentReps("")
+        setCurrentWeightPlaceholderColor("red");
+        return false
+      }
+      return true
+    }
+
+    const isSetValid = () => {
+      return isDayValid() && isMonthValid() && isYearValid() && isExerciseValid()
+&& isWeightValid() && isRepsValid()    }
   
     const addSet = () => {
 
+      if(isSetValid()){
       db.transaction(tx => {
         tx.executeSql(          'INSERT INTO sets (day, month, year, exercise, weight, reps) VALUES (?, ?, ?, ?, ?, ?)',
         [currentDay, currentMonth, currentYear, currentExercise, currentWeight, currentReps],
@@ -65,7 +145,14 @@ export default function RecordLiftScreen({ navigation }) {
         () => {}
       );
     }
-  );
+  );        
+      }
+
+      else {
+        console.log("Invalid Set")
+      }
+
+
 };
 
     return (
@@ -78,52 +165,51 @@ export default function RecordLiftScreen({ navigation }) {
       <View style={styles.homePageBody}>
         <View style={styles.inputDateView}>
           <TextInput
-            style={styles.inputDay}
+            style={[styles.inputDay]}
             value={currentDay}
             placeholder="dd"
-            placeholderTextColor="grey"
+            placeholderTextColor={currentDayPlaceholderColor}
             onChangeText={setCurrentDay}
           />
           <TextInput
             style={styles.inputMonth}
             value={currentMonth}
             placeholder="mm"
-            placeholderTextColor="grey"
+            placeholderTextColor={currentMonthPlaceholderColor}
             onChangeText={setCurrentMonth}
           />
           <TextInput
             style={styles.inputYear}
             value={currentYear}
             placeholder="yyyy"
-            placeholderTextColor="grey"
+            placeholderTextColor={currentYearPlaceholderColor}
             onChangeText={setCurrentYear}
           />
         </View>
         <TextInput
           style={styles.inputExercise}
           value={currentExercise}
-          placeholder="lift"
-          placeholderTextColor="grey"
+          placeholder="exercise"
+          placeholderTextColor={currentExercisePlaceholderColor}
           onChangeText={setCurrentExercise}
         />
         <TextInput
           style={styles.inputWeight}
           value={currentWeight}
           placeholder="weight"
-          placeholderTextColor="grey"
+          placeholderTextColor={currentWeightPlaceholderColor}
           onChangeText={setCurrentWeight}
         />
         <TextInput
           style={styles.inputReps}
           value={currentReps}
           placeholder="reps"
-          placeholderTextColor="grey"
+          placeholderTextColor={currentRepsPlaceholderColor}
           onChangeText={setCurrentReps}
         />
         <Pressable style={styles.addSetButton} onPress={addSet}>
           <Text style={{ textAlign: "center", fontSize: 24 }}>+</Text>
         </Pressable>
-        {/* {showNames()} */}
       </View>
       <View style={styles.homePageBottom}>
         <View style={styles.contactUsView}>
@@ -182,15 +268,15 @@ export default function RecordLiftScreen({ navigation }) {
         justifyContent: "space-evenly",
     },
     inputDay: {
-      width: '30%',
+      width: '32%',
       height: "100%",
+      marginRight: "2%",
       backgroundColor: 'white',
       borderRadius: 5,
-      color: 'black',
-      textAlign: "center",
+      textAlign: "center"
     },
     inputMonth: {
-      width: '30%',
+      width: '32%',
       height: "100%",
       backgroundColor: 'white',
       borderRadius: 5,
@@ -198,8 +284,9 @@ export default function RecordLiftScreen({ navigation }) {
       textAlign: "center",
     },
     inputYear: {
-      width: '30%',
+      width: '32%',
       height: "100%",
+      marginLeft: "2%",
       backgroundColor: 'white',
       borderRadius: 5,
       color: 'black',
