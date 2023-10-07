@@ -47,18 +47,12 @@ export default function RecordLiftScreen({ navigation }) {
 
     const isDayValid = () => {
       if((/[^0-9]/).test(currentDay)) {
-        setCurrentDay("");
-        setCurrentDayPlaceholderColor("red");
         return false
       }
       if(+currentDay < 1) {
-        setCurrentDay("")
-        setCurrentDayPlaceholderColor("red");
         return false
       }
       if(+currentDay > 31) {
-        setCurrentDay("")
-        setCurrentDayPlaceholderColor("red");
         return false
       }
       return true
@@ -66,17 +60,13 @@ export default function RecordLiftScreen({ navigation }) {
 
     const isMonthValid = () => {
       if(currentMonth == "ivm") {
-        setCurrentMonth("")
-        setCurrentMonthPlaceholderColor("red");
         return false
       }
       return true
     }
 
     const isYearValid = () => {
-      if(currentYear = "ivy") {
-        setCurrentYear("")
-        setCurrentYearPlaceholderColor("red");
+      if(currentYear == "ivy") {
         return false
       }
       return true
@@ -84,8 +74,6 @@ export default function RecordLiftScreen({ navigation }) {
 
     const isExerciseValid = () => {
       if(currentExercise == "ive") {
-        setCurrentExercise("")
-        setCurrentExercisePlaceholderColor("red");
         return false
       }
       return true
@@ -93,8 +81,6 @@ export default function RecordLiftScreen({ navigation }) {
 
     const isWeightValid = () => {
       if(currentWeight == "ivw") {
-        setCurrentWeight("")
-        setCurrentWeightPlaceholderColor("red");
         return false
       }
       return true
@@ -102,14 +88,36 @@ export default function RecordLiftScreen({ navigation }) {
 
     const isRepsValid = () => {
       if(currentReps == "ivr") {
-        setCurrentReps("")
-        setCurrentWeightPlaceholderColor("red");
         return false
       }
       return true
     }
 
     const isSetValid = () => {
+      if(!isDayValid()){
+        setCurrentDay("");
+        setCurrentDayPlaceholderColor("red");
+      }
+      if(!isMonthValid()){
+        setCurrentMonth("")
+        setCurrentMonthPlaceholderColor("red");
+      }
+      if(!isYearValid()){
+        setCurrentYear("")
+        setCurrentYearPlaceholderColor("red");
+      }
+      if(!isExerciseValid()){
+        setCurrentExercise("")
+        setCurrentExercisePlaceholderColor("red");
+      }
+      if(!isWeightValid()){
+        setCurrentWeight("")
+        setCurrentWeightPlaceholderColor("red");
+      }
+      if(!isRepsValid()){
+        setCurrentReps("")
+        setCurrentRepsPlaceholderColor("red");
+      }
       return isDayValid() && isMonthValid() && isYearValid() && isExerciseValid()
 && isWeightValid() && isRepsValid()    }
   
