@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, StatusBar, Pressable } from "react-native";
 
 export default function HomeScreen({ navigation }) {
   const handleStartPress = () => {
-    navigation.navigate("Record"); // Navigate to the RecordScreen
+    navigation.navigate("RecordOrDisplay"); // Navigate to the RecordOrDisplayScreen
   };
 
   return (
