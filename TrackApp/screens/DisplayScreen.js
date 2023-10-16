@@ -5,8 +5,7 @@ import {
   Pressable,
   View,
   TextInput,
-  Button,
-  Platform,
+  ScrollView,
 } from "react-native";
 import * as SQLite from "expo-sqlite";
 import { useState, useEffect } from "react";
@@ -19,12 +18,16 @@ export default function DisplayScreen({ navigation }) {
     useState("grey");
 
   const [currentStartMonth, setCurrentStartMonth] = useState("");
-  const [currentStartMonthPlaceholderColor, setCurrentStartMonthPlaceholderColor] =
-    useState("grey");
+  const [
+    currentStartMonthPlaceholderColor,
+    setCurrentStartMonthPlaceholderColor,
+  ] = useState("grey");
 
   const [currentStartYear, setCurrentStartYear] = useState("");
-  const [currentStartYearPlaceholderColor, setCurrentStartYearPlaceholderColor] =
-    useState("grey");
+  const [
+    currentStartYearPlaceholderColor,
+    setCurrentStartYearPlaceholderColor,
+  ] = useState("grey");
 
   const [currentEndDay, setCurrentEndDay] = useState("");
   const [currentEndDayPlaceholderColor, setCurrentEndDayPlaceholderColor] =
@@ -38,99 +41,188 @@ export default function DisplayScreen({ navigation }) {
   const [currentEndYearPlaceholderColor, setCurrentEndYearPlaceholderColor] =
     useState("grey");
 
-    const isStartDayValid = () => {  
-      if (currentStartDay.trim().length != 1 && currentStartDay.trim().length != 2) {
-        return false
-      }
-      if (/[^0-9]/.test(currentStartDay.trim())) {
-        return false;
-      }
-      if (+currentStartDay < 1) {
-        return false;
-      }
-      if (+currentStartDay > 31) {
-        return false;
-      }
-      return true;
-    };
-  
-    const isStartMonthValid = () => {
-      if (currentStartMonth.trim().length != 1 && currentStartMonth.trim().length != 2) {
-        return false
-      }    
-      if (/[^0-9]/.test(currentStartMonth.trim())) {
-        return false;
-      }
-      if (+currentStartMonth < 1) {
-        return false;
-      }
-      if (+currentStartMonth > 12) {
-        return false;
-      }
-      return true;
-    };
-  
-    const isStartYearValid = () => {
-      if (currentStartYear.trim().length != 4) {
-        return false
-      }    
-      if (/[^0-9]/.test(currentStartYear.trim())) {
-        return false;
-      }
-      return true;
-    };
+  const [exercises, setExercises] = useState([]);
+  const [isExercisesShowing, setIsExercisesShowing] = useState(false)
+  const [selectedExercise, setSelectedExercise] = useState("Pick An Exercise")
 
-    const isEndDayValid = () => {  
-      if (currentEndDay.trim().length != 1 && currentEndDay.trim().length != 2) {
-        return false
-      }
-      if (/[^0-9]/.test(currentEndDay.trim())) {
-        return false;
-      }
-      if (+currentEndDay < 1) {
-        return false;
-      }
-      if (+currentEndDay > 31) {
-        return false;
-      }
-      return true;
-    };
+  useEffect(() => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT DISTINCT exercise FROM sets",
+        [],
+        (_, { rows }) => {
+          // Extract the rows and store them in the exercises array
+          const exercisesData = [];
+          for (let i = 0; i < rows.length; i++) {
+            exercisesData.push(rows.item(i).exercise);
+          }
+
+          setExercises(exercisesData);
+        }
+      );
+    });
+  }, [db]);
+
   
-    const isEndMonthValid = () => {
-      if (currentEndMonth.trim().length != 1 && currentEndMonth.trim().length != 2) {
-        return false
-      }    
-      if (/[^0-9]/.test(currentEndMonth.trim())) {
-        return false;
-      }
-      if (+currentEndMonth < 1) {
-        return false;
-      }
-      if (+currentEndMonth > 12) {
-        return false;
-      }
-      return true;
-    };
-  
-    const isEndYearValid = () => {
-      if (currentEndYear.trim().length != 4) {
-        return false
-      }    
-      if (/[^0-9]/.test(currentEndYear.trim())) {
-        return false;
-      }
-      return true;
-    };
+
+  const isStartDayValid = () => {
+    if (
+      currentStartDay.trim().length != 1 &&
+      currentStartDay.trim().length != 2
+    ) {
+      return false;
+    }
+    if (/[^0-9]/.test(currentStartDay.trim())) {
+      return false;
+    }
+    if (+currentStartDay < 1) {
+      return false;
+    }
+    if (+currentStartDay > 31) {
+      return false;
+    }
+    return true;
+  };
+
+  const isStartMonthValid = () => {
+    if (
+      currentStartMonth.trim().length != 1 &&
+      currentStartMonth.trim().length != 2
+    ) {
+      return false;
+    }
+    if (/[^0-9]/.test(currentStartMonth.trim())) {
+      return false;
+    }
+    if (+currentStartMonth < 1) {
+      return false;
+    }
+    if (+currentStartMonth > 12) {
+      return false;
+    }
+    return true;
+  };
+
+  const isStartYearValid = () => {
+    if (currentStartYear.trim().length != 4) {
+      return false;
+    }
+    if (/[^0-9]/.test(currentStartYear.trim())) {
+      return false;
+    }
+    return true;
+  };
+
+  const isEndDayValid = () => {
+    if (currentEndDay.trim().length != 1 && currentEndDay.trim().length != 2) {
+      return false;
+    }
+    if (/[^0-9]/.test(currentEndDay.trim())) {
+      return false;
+    }
+    if (+currentEndDay < 1) {
+      return false;
+    }
+    if (+currentEndDay > 31) {
+      return false;
+    }
+    return true;
+  };
+
+  const isEndMonthValid = () => {
+    if (
+      currentEndMonth.trim().length != 1 &&
+      currentEndMonth.trim().length != 2
+    ) {
+      return false;
+    }
+    if (/[^0-9]/.test(currentEndMonth.trim())) {
+      return false;
+    }
+    if (+currentEndMonth < 1) {
+      return false;
+    }
+    if (+currentEndMonth > 12) {
+      return false;
+    }
+    return true;
+  };
+
+  const isEndYearValid = () => {
+    if (currentEndYear.trim().length != 4) {
+      return false;
+    }
+    if (/[^0-9]/.test(currentEndYear.trim())) {
+      return false;
+    }
+    return true;
+  };
+
+  const isDatesValid = () => {
+    if (!isStartDayValid()) {
+      setCurrentStartDay("");
+      setCurrentStartDayPlaceholderColor("red");
+    } else {
+      setCurrentStartDayPlaceholderColor("grey");
+    }
+    if (!isStartMonthValid()) {
+      setCurrentStartMonth("");
+      setCurrentStartMonthPlaceholderColor("red");
+    } else {
+      setCurrentStartMonthPlaceholderColor("grey");
+    }
+    if (!isStartYearValid()) {
+      setCurrentStartYear("");
+      setCurrentStartYearPlaceholderColor("red");
+    } else {
+      setCurrentStartYearPlaceholderColor("grey");
+    }
+    if (!isEndDayValid()) {
+      setCurrentEndDay("");
+      setCurrentEndDayPlaceholderColor("red");
+    } else {
+      setCurrentEndDayPlaceholderColor("grey");
+    }
+    if (!isEndMonthValid()) {
+      setCurrentEndMonth("");
+      setCurrentEndMonthPlaceholderColor("red");
+    } else {
+      setCurrentEndMonthPlaceholderColor("grey");
+    }
+    if (!isEndYearValid()) {
+      setCurrentEndYear("");
+      setCurrentEndYearPlaceholderColor("red");
+    } else {
+      setCurrentEndYearPlaceholderColor("grey");
+    }
+    return (
+      isStartDayValid() &&
+      isStartMonthValid() &&
+      isStartYearValid() &&
+      isEndDayValid() &&
+      isEndMonthValid() &&
+      isEndYearValid()
+    );
+  };
+
+  const showExercises = () => {
+    setIsExercisesShowing(true)
+  }
+
+  const displayStats = () => {
+    if (isDatesValid()) {
+      return true; ///////////////////////////
+    }
+  };
 
   return (
     <View style={styles.container}>
-
       <View style={styles.homePageTop}>
         <View style={styles.logoView}>
           <Text style={styles.logo}>TRACK APP</Text>
         </View>
       </View>
-        <View style={styles.homePageBody}>  
+      <View style={styles.homePageBody}>
         <View style={styles.inputStartDateView}>
           <TextInput
             style={[styles.inputStartDay]}
@@ -153,7 +245,7 @@ export default function DisplayScreen({ navigation }) {
             placeholderTextColor={currentStartYearPlaceholderColor}
             onChangeText={setCurrentStartYear}
           />
-        </View>   
+        </View>
         <View style={styles.inputEndDateView}>
           <TextInput
             style={[styles.inputEndDay]}
@@ -176,8 +268,23 @@ export default function DisplayScreen({ navigation }) {
             placeholderTextColor={currentEndYearPlaceholderColor}
             onChangeText={setCurrentEndYear}
           />
-        </View>    
-            </View>
+        </View>
+      <View style={styles.inputExerciseView}>
+      {!isExercisesShowing && <Pressable style={styles.inputExerciseButton} onPress={showExercises}>
+      <Text style={styles.inputExerciseText}>{`${isExercisesShowing}`}</Text>
+      </Pressable>}
+      {isExercisesShowing && <ScrollView style={styles.exerciseList}>
+        {exercises.map(ex => <Pressable>
+            <Text style={{color:"white"}}>{ex}</Text>
+          </Pressable>)}
+      </ScrollView>}
+      </View>
+        <View style={styles.displayStatsView}>
+          <Pressable style={styles.displayStatsButton} onPress={displayStats}>
+            <Text style={styles.displayStatsText}>Show Stats</Text>
+          </Pressable>
+        </View>
+      </View>
       <View style={styles.homePageBottom}>
         <View style={styles.contactUsView}>
           <Text style={styles.contact}>Contact Us</Text>
@@ -293,6 +400,40 @@ const styles = StyleSheet.create({
     color: "black",
     textAlign: "center",
   },
+  inputExerciseView: {
+    height: "10%",
+    width: "50%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  inputExerciseButton: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 5,
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  inputExerciseText: {
+    fontSize: 20,
+  },
+  displayStatsView: {
+    height: "10%",
+    width: "50%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  displayStatsButton: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 5,
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  displayStatsText: {
+    fontSize: 20,
+  },
   homePageBottom: {
     display: "flex",
     flexDirection: "row",
@@ -306,6 +447,6 @@ const styles = StyleSheet.create({
   },
   contact: {
     fontSize: 24,
-    textDecorationLine: "line-through"
+    textDecorationLine: "line-through",
   },
 });
