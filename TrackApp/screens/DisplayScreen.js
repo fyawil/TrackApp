@@ -204,21 +204,20 @@ export default function DisplayScreen({ navigation }) {
     setIsExercisesShowing(false);
   };
 
-  const displayStats = () => {
-    if (isDatesValid()) {
-    db.transaction((tx) => {
-      tx.executeSql("SELECT exercise FROM sets", [], (_, { rows }) => {
-        // Extract the rows and store them in the exercises array
-        const exercisesData = [];
-        for (let i = 0; i < rows.length; i++) {
-          exercisesData.push(rows.item(i).exercise);
-        }
+  // import isDateValid from RecordLiftScreen.js
 
-        setExercises(exercisesData.sort());
-      });
-    });
-    }
+  const isDisplayRequestValid = () => {
+    // Validate dates here and display red placeholders if error in date
+    // Use isDateValid from RecordLiftScreen.js
+  }
+
+  const displayStats = () => {
+// If dates are valid and exercise data is available, create an array of objects of sets
+// If dates are valid but no exercise data is available, print "No data for x exercise between these dates"
+// If dates are invalid, show the error via red placeholders for the offending dates
   };
+
+  // Display Chart on popup view with datapoint values shown at the datapoint
 
   return (
     <View style={styles.container}>
