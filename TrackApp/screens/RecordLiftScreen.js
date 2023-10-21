@@ -30,6 +30,8 @@ export default function RecordLiftScreen({ navigation }) {
   const [currentYearPlaceholderColor, setCurrentYearPlaceholderColor] =
     useState("grey");
 
+  const [currentDate, setCurrentDate] = useState("");
+
   const [currentExercise, setCurrentExercise] = useState("");
   const [currentExercisePlaceholderColor, setCurrentExercisePlaceholderColor] =
     useState("grey");
@@ -45,9 +47,10 @@ export default function RecordLiftScreen({ navigation }) {
   const [showSuccessView, setShowSuccessView] = useState(false);
 
   useEffect(() => {
+
     db.transaction((tx) => {
       tx.executeSql(
-        "CREATE TABLE IF NOT EXISTS sets (id INTEGER PRIMARY KEY AUTOINCREMENT, day INTEGER, month INTEGER, year INTEGER, exercise TEXT, weight REAL, reps INTEGER)"
+        "CREATE TABLE IF NOT EXISTS sets (id INTEGER PRIMARY KEY AUTOINCREMENT, date DATE, exercise TEXT, weight REAL, reps INTEGER)"
       );
     });
 
@@ -62,53 +65,33 @@ export default function RecordLiftScreen({ navigation }) {
     );
   }
 
-  const isDayValid = () => {  
-    if (currentDay.trim().length != 1 && currentDay.trim().length != 2) {
-      return false
-    }
-    if (/[^0-9]/.test(currentDay.trim())) {
-      return false;
-    }
-    if (+currentDay < 1) {
-      return false;
-    }
-    if (+currentDay > 31) {
-      return false;
-    }
-    return true;
-  };
+  const isDateValid = () => {
+    const date = new Date(currentYear, currentMonth - 1, currentDay);
 
-  const isMonthValid = () => {
-    if (currentMonth.trim().length != 1 && currentMonth.trim().length != 2) {
-      return false
-    }    
-    if (/[^0-9]/.test(currentMonth.trim())) {
+    if (
+      date.getFullYear() === year &&
+      date.getMonth() === month - 1 &&
+      date.getDate() === day
+    ) {
+      // Format the date as 'YYYY-MM-DD'
+      const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      setCurrentDate(formattedDate)
+      console.log(`The date ${formattedDate} is valid.`);
+      return true;
+    } else {
+      console.log(`The date is not valid.`);
       return false;
     }
-    if (+currentMonth < 1) {
-      return false;
-    }
-    if (+currentMonth > 12) {
-      return false;
-    }
-    return true;
-  };
-
-  const isYearValid = () => {
-    if (currentYear.trim().length != 4) {
-      return false
-    }    
-    if (/[^0-9]/.test(currentYear.trim())) {
-      return false;
-    }
-    return true;
   };
 
   const isExerciseValid = () => {
     if (/[^A-Za-z]/.test(currentExercise.trim())) {
       return false;
     }
-    if (currentExercise.trim().length < 3 || currentExercise.trim().length > 50) {
+    if (
+      currentExercise.trim().length < 3 ||
+      currentExercise.trim().length > 50
+    ) {
       return false;
     }
     return true;
@@ -123,7 +106,7 @@ export default function RecordLiftScreen({ navigation }) {
 
   const isRepsValid = () => {
     if (currentReps.trim() == "") {
-      return false
+      return false;
     }
     if (/[^0-9]/.test(currentReps.trim())) {
       return false;
@@ -135,53 +118,40 @@ export default function RecordLiftScreen({ navigation }) {
   };
 
   const isSetValid = () => {
-    if (!isDayValid()) {
+    if (!isDateValid()) {
+      console.log("Invalid Date"); /////////////////////////////////
       setCurrentDay("");
-      setCurrentDayPlaceholderColor("red");
-    }
-    else {
-      setCurrentDayPlaceholderColor("grey");      
-    }
-    if (!isMonthValid()) {
       setCurrentMonth("");
-      setCurrentMonthPlaceholderColor("red");
-    }
-    else {
-      setCurrentMonthPlaceholderColor("grey");
-    }
-    if (!isYearValid()) {
       setCurrentYear("");
+      setCurrentDayPlaceholderColor("red");
+      setCurrentMonthPlaceholderColor("red");
       setCurrentYearPlaceholderColor("red");
-    }
-    else {
+    } else {
+      setCurrentDayPlaceholderColor("grey");
+      setCurrentMonthPlaceholderColor("grey");
       setCurrentYearPlaceholderColor("grey");
     }
     if (!isExerciseValid()) {
       setCurrentExercise("");
       setCurrentExercisePlaceholderColor("red");
-    }
-    else {
+    } else {
       setCurrentExercisePlaceholderColor("grey");
     }
     if (!isWeightValid()) {
       setCurrentWeight("");
       setCurrentWeightPlaceholderColor("red");
-    }
-    else {
+    } else {
       setCurrentWeightPlaceholderColor("grey");
     }
     if (!isRepsValid()) {
       setCurrentReps("");
       setCurrentRepsPlaceholderColor("red");
+    } else {
+      setCurrentRepsPlaceholderColor("grey");
     }
-    else {
-      setCurrentRepsPlaceholderColor("grey");  
-    }
-    
+
     return (
-      isDayValid() &&
-      isMonthValid() &&
-      isYearValid() &&
+      isDateValid() &&
       isExerciseValid() &&
       isWeightValid() &&
       isRepsValid()
@@ -193,11 +163,9 @@ export default function RecordLiftScreen({ navigation }) {
       db.transaction(
         (tx) => {
           tx.executeSql(
-            "INSERT INTO sets (day, month, year, exercise, weight, reps) VALUES (?, ?, ?, ?, ?, ?)",
+            "INSERT INTO sets (date, exercise, weight, reps) VALUES (?, ?, ?, ?)",
             [
-              currentDay,
-              currentMonth,
-              currentYear,
+              currentDate,
               currentExercise,
               currentWeight,
               currentReps,
@@ -221,13 +189,13 @@ export default function RecordLiftScreen({ navigation }) {
             (tx) => {
               tx.executeSql("SELECT * FROM sets", [], (_, { rows }) => {
                 const data = rows._array;
-                console.log(data); // Log the data
+                console.log(data); // Log the data /////////////////////////////////////////////////////
               });
             },
             null,
             () => {}
           );
-          displaySuccessMessage()
+          displaySuccessMessage();
         }
       );
     } else {
@@ -246,70 +214,70 @@ export default function RecordLiftScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-
       <View style={styles.homePageTop}>
         <View style={styles.logoView}>
           <Text style={styles.logo}>TRACK APP</Text>
         </View>
       </View>
-      
-        {showSuccessView && (
-          <View style={styles.homePageBody}>
-        <View style={styles.successView}>
-          <Text style={styles.successText}>Set complete!</Text>
-        </View>
+
+      {showSuccessView && (
+        <View style={styles.homePageBody}>
+          <View style={styles.successView}>
+            <Text style={styles.successText}>Set complete!</Text>
+          </View>
         </View>
       )}
-        {!showSuccessView && (<View style={styles.homePageBody}>
+      {!showSuccessView && (
+        <View style={styles.homePageBody}>
           <View style={styles.inputDateView}>
+            <TextInput
+              style={[styles.inputDay]}
+              value={currentDay}
+              placeholder="dd"
+              placeholderTextColor={currentDayPlaceholderColor}
+              onChangeText={setCurrentDay}
+            />
+            <TextInput
+              style={styles.inputMonth}
+              value={currentMonth}
+              placeholder="mm"
+              placeholderTextColor={currentMonthPlaceholderColor}
+              onChangeText={setCurrentMonth}
+            />
+            <TextInput
+              style={styles.inputYear}
+              value={currentYear}
+              placeholder="yyyy"
+              placeholderTextColor={currentYearPlaceholderColor}
+              onChangeText={setCurrentYear}
+            />
+          </View>
           <TextInput
-            style={[styles.inputDay]}
-            value={currentDay}
-            placeholder="dd"
-            placeholderTextColor={currentDayPlaceholderColor}
-            onChangeText={setCurrentDay}
+            style={styles.inputExercise}
+            value={currentExercise}
+            placeholder="exercise"
+            placeholderTextColor={currentExercisePlaceholderColor}
+            onChangeText={setCurrentExercise}
           />
           <TextInput
-            style={styles.inputMonth}
-            value={currentMonth}
-            placeholder="mm"
-            placeholderTextColor={currentMonthPlaceholderColor}
-            onChangeText={setCurrentMonth}
+            style={styles.inputWeight}
+            value={currentWeight}
+            placeholder="weight"
+            placeholderTextColor={currentWeightPlaceholderColor}
+            onChangeText={setCurrentWeight}
           />
           <TextInput
-            style={styles.inputYear}
-            value={currentYear}
-            placeholder="yyyy"
-            placeholderTextColor={currentYearPlaceholderColor}
-            onChangeText={setCurrentYear}
+            style={styles.inputReps}
+            value={currentReps}
+            placeholder="reps"
+            placeholderTextColor={currentRepsPlaceholderColor}
+            onChangeText={setCurrentReps}
           />
+          <Pressable style={styles.addSetButton} onPress={addSet}>
+            <Text style={{ textAlign: "center", fontSize: 24 }}>+</Text>
+          </Pressable>
         </View>
-        <TextInput
-          style={styles.inputExercise}
-          value={currentExercise}
-          placeholder="exercise"
-          placeholderTextColor={currentExercisePlaceholderColor}
-          onChangeText={setCurrentExercise}
-        />
-        <TextInput
-          style={styles.inputWeight}
-          value={currentWeight}
-          placeholder="weight"
-          placeholderTextColor={currentWeightPlaceholderColor}
-          onChangeText={setCurrentWeight}
-        />
-        <TextInput
-          style={styles.inputReps}
-          value={currentReps}
-          placeholder="reps"
-          placeholderTextColor={currentRepsPlaceholderColor}
-          onChangeText={setCurrentReps}
-        />
-        <Pressable style={styles.addSetButton} onPress={addSet}>
-          <Text style={{ textAlign: "center", fontSize: 24 }}>+</Text>
-        </Pressable>          
-            </View>
-        )}
+      )}
       <View style={styles.homePageBottom}>
         <View style={styles.contactUsView}>
           <Text style={styles.contact}>Contact Us</Text>
@@ -361,11 +329,11 @@ const styles = StyleSheet.create({
     height: "100%",
     width: "100%",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   successText: {
     fontSize: 36,
-    color: "white"
+    color: "white",
   },
   inputDateView: {
     display: "flex",
@@ -444,6 +412,6 @@ const styles = StyleSheet.create({
   },
   contact: {
     fontSize: 24,
-    textDecorationLine: "line-through"
+    textDecorationLine: "line-through",
   },
 });

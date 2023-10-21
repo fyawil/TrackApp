@@ -206,7 +206,17 @@ export default function DisplayScreen({ navigation }) {
 
   const displayStats = () => {
     if (isDatesValid()) {
-      return true; ///////////////////////////
+    db.transaction((tx) => {
+      tx.executeSql("SELECT exercise FROM sets", [], (_, { rows }) => {
+        // Extract the rows and store them in the exercises array
+        const exercisesData = [];
+        for (let i = 0; i < rows.length; i++) {
+          exercisesData.push(rows.item(i).exercise);
+        }
+
+        setExercises(exercisesData.sort());
+      });
+    });
     }
   };
 
