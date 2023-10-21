@@ -42,28 +42,22 @@ export default function DisplayScreen({ navigation }) {
     useState("grey");
 
   const [exercises, setExercises] = useState([]);
-  const [isExercisesShowing, setIsExercisesShowing] = useState(false)
-  const [selectedExercise, setSelectedExercise] = useState("Pick An Exercise")
+  const [isExercisesShowing, setIsExercisesShowing] = useState(false);
+  const [selectedExercise, setSelectedExercise] = useState("Pick An Exercise");
 
   useEffect(() => {
     db.transaction((tx) => {
-      tx.executeSql(
-        "SELECT DISTINCT exercise FROM sets",
-        [],
-        (_, { rows }) => {
-          // Extract the rows and store them in the exercises array
-          const exercisesData = [];
-          for (let i = 0; i < rows.length; i++) {
-            exercisesData.push(rows.item(i).exercise);
-          }
-
-          setExercises(exercisesData);
+      tx.executeSql("SELECT DISTINCT exercise FROM sets", [], (_, { rows }) => {
+        // Extract the rows and store them in the exercises array
+        const exercisesData = [];
+        for (let i = 0; i < rows.length; i++) {
+          exercisesData.push(rows.item(i).exercise);
         }
-      );
+
+        setExercises(exercisesData.sort());
+      });
     });
   }, [db]);
-
-  
 
   const isStartDayValid = () => {
     if (
@@ -205,9 +199,10 @@ export default function DisplayScreen({ navigation }) {
     );
   };
 
-  const showExercises = () => {
-    setIsExercisesShowing(true)
-  }
+  const handleSetSelectedExercise = (ex) => {
+    setSelectedExercise(ex);
+    setIsExercisesShowing(false);
+  };
 
   const displayStats = () => {
     if (isDatesValid()) {
@@ -269,16 +264,34 @@ export default function DisplayScreen({ navigation }) {
             onChangeText={setCurrentEndYear}
           />
         </View>
-      <View style={styles.inputExerciseView}>
-      {!isExercisesShowing && <Pressable style={styles.inputExerciseButton} onPress={showExercises}>
-      <Text style={styles.inputExerciseText}>{`${isExercisesShowing}`}</Text>
-      </Pressable>}
-      {isExercisesShowing && <ScrollView style={styles.exerciseList}>
-        {exercises.map(ex => <Pressable>
-            <Text style={{color:"white"}}>{ex}</Text>
-          </Pressable>)}
-      </ScrollView>}
-      </View>
+
+        {!isExercisesShowing && (
+          <View style={styles.inputExerciseView}>
+            <Pressable
+              value={true}
+              style={styles.inputExerciseButton}
+              onPress={setIsExercisesShowing}
+            >
+              <Text
+                style={styles.inputExerciseText}
+              >{`${selectedExercise}`}</Text>
+            </Pressable>
+          </View>
+        )}
+        {isExercisesShowing && (
+          <View style={styles.selectExerciseView}>
+            <ScrollView
+              style={styles.selectExerciseScrollView}
+              showsVerticalScrollIndicator={true}
+            >
+              {exercises.map((ex) => (
+                <Pressable key={ex} onPress={() => handleSetSelectedExercise(ex)}>
+                  <Text style={styles.selectExerciseText}>{ex}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        )}
         <View style={styles.displayStatsView}>
           <Pressable style={styles.displayStatsButton} onPress={displayStats}>
             <Text style={styles.displayStatsText}>Show Stats</Text>
@@ -415,6 +428,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   inputExerciseText: {
+    fontSize: 20,
+  },
+  selectExerciseView: {
+    height: "20%",
+    width: "50%",
+    backgroundColor: "white",
+  },
+  selectExerciseScrollView: {
+    height: "100%",
+  },
+  selectExerciseText: {
     fontSize: 20,
   },
   displayStatsView: {
