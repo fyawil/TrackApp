@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import * as SQLite from "expo-sqlite";
 import { useState, useEffect } from "react";
+import { LineChart } from 'react-native-chart-kit';
 
 export default function DisplayScreen({ navigation }) {
   const db = SQLite.openDatabase("trackLog.db");
@@ -43,7 +44,9 @@ export default function DisplayScreen({ navigation }) {
 
   const [exercises, setExercises] = useState([]);
   const [isExercisesShowing, setIsExercisesShowing] = useState(false);
+
   const [selectedExercise, setSelectedExercise] = useState("Pick An Exercise");
+  const [chartData, setChartData] = useState([])
 
   useEffect(() => {
     db.transaction((tx) => {
@@ -204,15 +207,23 @@ export default function DisplayScreen({ navigation }) {
     setIsExercisesShowing(false);
   };
 
-  // import isDateValid from RecordLiftScreen.js
-
-  const isDisplayRequestValid = () => {
-    // Validate dates here and display red placeholders if error in date
-    // Use isDateValid from RecordLiftScreen.js
-  }
-
   const displayStats = () => {
 // If dates are valid and exercise data is available, create an array of objects of sets
+if(isDatesValid()){
+  db.transaction((tx) => {
+    tx.executeSql("SELECT date, weight FROM sets WHERE exercise = 'Deadlift'", [], (_, { rows }) => {
+      // Extract the rows and store them in the exercises array
+      var dataPoint = {}
+      for (let i = 0; i < rows.length; i++) {
+        dataPoint.date = rows.item(i).date;
+        dataPoint.weight = rows.item(i).weight;
+        setChartData([...chartData,dataPoint])
+      }
+    });
+  });
+  console.log(chartData)
+};
+
 // If dates are valid but no exercise data is available, print "No data for x exercise between these dates"
 // If dates are invalid, show the error via red placeholders for the offending dates
   };
