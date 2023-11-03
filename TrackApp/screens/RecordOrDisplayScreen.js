@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, StatusBar, Pressable } from "react-native";
 
 export default function RecordScreen({ navigation }) {
   const handleRecord = () => {
-    navigation.navigate("Record"); // Navigate to the RecordScreen
+    navigation.navigate("Record"); // Navigate to the Record Screen
   };
 
   const handleDisplay = () => {

@@ -1,9 +1,163 @@
-import React from "react";
-import { StyleSheet, Text, View, StatusBar, Pressable } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  StatusBar,
+  Pressable,
+  View,
+  TextInput
+} from "react-native";
+import * as SQLite from "expo-sqlite";
+import { useState, useEffect } from "react";
 
-export default function RecordScreen({ navigation }) {
-  const handleRecordLift = () => {
-    navigation.navigate("RecordLift"); // Navigate to the RecordLiftScreen
+export default function RecordLiftScreen({ navigation }) {
+  const db = SQLite.openDatabase("trackLog.db");
+  const [isLoading, setIsLoading] = useState(true);
+
+  date = new Date().toLocaleDateString()
+  const [currentDate, setCurrentDate] = useState(`${date}`);
+
+  const [currentExercise, setCurrentExercise] = useState("");
+  const [currentExercisePlaceholderColor, setCurrentExercisePlaceholderColor] =
+    useState("grey");
+
+  const [currentWeight, setCurrentWeight] = useState("");
+  const [currentWeightPlaceholderColor, setCurrentWeightPlaceholderColor] =
+    useState("grey");
+
+  const [currentReps, setCurrentReps] = useState("");
+  const [currentRepsPlaceholderColor, setCurrentRepsPlaceholderColor] =
+    useState("grey");
+
+  const [showSuccessView, setShowSuccessView] = useState(false);
+
+  useEffect(() => { 
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS sets (id INTEGER PRIMARY KEY AUTOINCREMENT, date DATE, exercise TEXT, weight REAL, reps INTEGER)"
+      );
+    });
+
+    setIsLoading(false);
+  }, [db]);
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  const isExerciseValid = () => {
+    if (/[^A-Za-z]/.test(currentExercise.trim())) {
+      return false;
+    }
+    if (
+      currentExercise.trim().length < 3 ||
+      currentExercise.trim().length > 50
+    ) {
+      return false;
+    }
+    return true;
+  };
+
+  const isWeightValid = () => {
+    if (!/^\d+(\.\d+)?$/.test(currentWeight.trim())) {
+      return false;
+    }
+    return true;
+  };
+
+  const isRepsValid = () => {
+    if (currentReps.trim() == "") {
+      return false;
+    }
+    if (/[^0-9]/.test(currentReps.trim())) {
+      return false;
+    }
+    if (+currentReps < 0) {
+      return false;
+    }
+    return true;
+  };
+
+  const isSetValid = () => {
+    if (!isExerciseValid()) {
+      setCurrentExercise("");
+      setCurrentExercisePlaceholderColor("red");
+    } else {
+      setCurrentExercisePlaceholderColor("grey");
+    }
+    if (!isWeightValid()) {
+      setCurrentWeight("");
+      setCurrentWeightPlaceholderColor("red");
+    } else {
+      setCurrentWeightPlaceholderColor("grey");
+    }
+    if (!isRepsValid()) {
+      setCurrentReps("");
+      setCurrentRepsPlaceholderColor("red");
+    } else {
+      setCurrentRepsPlaceholderColor("grey");
+    }
+
+    return (
+      isExerciseValid() &&
+      isWeightValid() &&
+      isRepsValid()
+    );
+  };
+
+  const addSet = () => {
+    if (isSetValid()) {
+      db.transaction(
+        (tx) => {
+          tx.executeSql(
+            "INSERT INTO sets (date, exercise, weight, reps) VALUES (?, ?, ?, ?)",
+            [
+              currentDate,
+              currentExercise,
+              currentWeight,
+              currentReps,
+            ],
+            (_, { insertId }) => {
+              // Data inserted successfully, you can clear the input fields here
+              setCurrentExercise("");
+              setCurrentWeight("");
+              setCurrentReps("");
+            },
+            (_, error) => console.log(error)
+          );
+        },
+        null,
+        () => {
+          // After successful insertion, log the data
+          db.transaction(
+            (tx) => {
+              tx.executeSql("SELECT * FROM sets", [], (_, { rows }) => {
+                const data = rows._array;
+                console.log(data); // Log the data /////////////////////////////////////////////////////
+              });
+            },
+            null,
+            () => {}
+          );
+          displaySuccessMessage();
+        }
+      );
+    } else {
+      console.log("Invalid Set");
+    }
+  };
+
+  const displaySuccessMessage = () => {
+    setShowSuccessView(true);
+
+    // Hide the view after 3 seconds
+    setTimeout(() => {
+      setShowSuccessView(false);
+    }, 3000);
   };
 
   return (
@@ -13,27 +167,42 @@ export default function RecordScreen({ navigation }) {
           <Text style={styles.logo}>TRACK APP</Text>
         </View>
       </View>
-      <View style={styles.homePageBody}>
-        <View style={styles.topQuoteView}>
-          <Text style={styles.topQuote}>Ingrain Grit</Text>
+
+      {showSuccessView && (
+        <View style={styles.homePageBody}>
+          <View style={styles.successView}>
+            <Text style={styles.successText}>Set complete!</Text>
+          </View>
         </View>
-        <View style={styles.recordLiftButtonView}>
-          <Pressable style={styles.recordLiftButton} onPress={handleRecordLift}>
-            <Text style={{ color: "black", fontSize: 24 }}>Record Lift</Text>
+      )}
+      {!showSuccessView && (
+        <View style={styles.homePageBody}>
+          <TextInput
+            style={styles.inputExercise}
+            value={currentExercise}
+            placeholder="exercise"
+            placeholderTextColor={currentExercisePlaceholderColor}
+            onChangeText={setCurrentExercise}
+          />
+          <TextInput
+            style={styles.inputWeight}
+            value={currentWeight}
+            placeholder="weight"
+            placeholderTextColor={currentWeightPlaceholderColor}
+            onChangeText={setCurrentWeight}
+          />
+          <TextInput
+            style={styles.inputReps}
+            value={currentReps}
+            placeholder="reps"
+            placeholderTextColor={currentRepsPlaceholderColor}
+            onChangeText={setCurrentReps}
+          />
+          <Pressable style={styles.addSetButton} onPress={addSet}>
+            <Text style={{ textAlign: "center", fontSize: 24 }}>+</Text>
           </Pressable>
         </View>
-        <View style={styles.orView}>
-          <Text style={{ color: "white", fontSize: 24 }}>Or</Text>          
-        </View>
-        <View style={styles.recordRunButtonView}>
-          <Pressable style={styles.recordRunButton}>
-            <Text style={{ color: "black", fontSize: 24, textDecorationLine: "line-through", }}>Record Run</Text>
-          </Pressable>
-        </View>
-        <View style={styles.bottomQuoteView}>
-          <Text style={styles.bottomQuote}>Master The Mechanics</Text>
-        </View>
-      </View>
+      )}
       <View style={styles.homePageBottom}>
         <View style={styles.contactUsView}>
           <Text style={styles.contact}>Contact Us</Text>
@@ -46,10 +215,17 @@ export default function RecordScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    display: "flex",
+    flex: 1,
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "stretch",
+    justifyContent: "space-between",
+    margin: 8,
   },
   homePageTop: {
     display: "flex",
@@ -71,58 +247,48 @@ const styles = StyleSheet.create({
     backgroundColor: "black",
     height: "80%",
     width: "100%",
+    alignItems: "center",
+    justifyContent: "space-evenly",
   },
-  topQuoteView: {
-    height: "20%",
+  successView: {
+    height: "100%",
     width: "100%",
-    alignItems: "right",
+    alignItems: "center",
     justifyContent: "center",
   },
-  topQuote: {
+  successText: {
+    fontSize: 36,
     color: "white",
-    fontSize: 24,
-    textAlign: "right",
   },
-  recordLiftButtonView: {
-    height: "20%",
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  recordLiftButton: {
+  inputExercise: {
+    width: "50%",
+    height: "10%",
     backgroundColor: "white",
-    padding: 20,
-    alignItems: "center",
-    justifyContent: "center",
+    borderRadius: 5,
+    color: "black",
+    textAlign: "center",
   },
-  orView: {
-    height: "20%",
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  recordRunButtonView: {
-    height: "20%",
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  recordRunButton: {
+  inputWeight: {
+    width: "50%",
+    height: "10%",
     backgroundColor: "white",
-    padding: 20,
-    alignItems: "center",
-    justifyContent: "center",
+    borderRadius: 5,
+    color: "black",
+    textAlign: "center",
   },
-  bottomQuoteView: {
-    height: "20%",
-    width: "100%",
-    alignItems: "left",
-    justifyContent: "center",
+  inputReps: {
+    width: "50%",
+    height: "10%",
+    backgroundColor: "white",
+    borderRadius: 5,
+    color: "black",
+    textAlign: "center",
   },
-  bottomQuote: {
-    color: "white",
-    fontSize: 24,
-    textAlign: "left",
+  addSetButton: {
+    padding: 15,
+    backgroundColor: "white",
+    borderRadius: 5,
+    justifyContent: "center",
   },
   homePageBottom: {
     display: "flex",
@@ -140,4 +306,3 @@ const styles = StyleSheet.create({
     textDecorationLine: "line-through",
   },
 });
-

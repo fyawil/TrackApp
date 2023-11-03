@@ -6,6 +6,7 @@ import {
   View,
   TextInput,
   ScrollView,
+  Dimensions
 } from "react-native";
 import * as SQLite from "expo-sqlite";
 import { useState, useEffect } from "react";
@@ -14,39 +15,14 @@ import { LineChart } from 'react-native-chart-kit';
 export default function DisplayScreen({ navigation }) {
   const db = SQLite.openDatabase("trackLog.db");
 
-  const [currentStartDay, setCurrentStartDay] = useState("");
-  const [currentStartDayPlaceholderColor, setCurrentStartDayPlaceholderColor] =
-    useState("grey");
-
-  const [currentStartMonth, setCurrentStartMonth] = useState("");
-  const [
-    currentStartMonthPlaceholderColor,
-    setCurrentStartMonthPlaceholderColor,
-  ] = useState("grey");
-
-  const [currentStartYear, setCurrentStartYear] = useState("");
-  const [
-    currentStartYearPlaceholderColor,
-    setCurrentStartYearPlaceholderColor,
-  ] = useState("grey");
-
-  const [currentEndDay, setCurrentEndDay] = useState("");
-  const [currentEndDayPlaceholderColor, setCurrentEndDayPlaceholderColor] =
-    useState("grey");
-
-  const [currentEndMonth, setCurrentEndMonth] = useState("");
-  const [currentEndMonthPlaceholderColor, setCurrentEndMonthPlaceholderColor] =
-    useState("grey");
-
-  const [currentEndYear, setCurrentEndYear] = useState("");
-  const [currentEndYearPlaceholderColor, setCurrentEndYearPlaceholderColor] =
-    useState("grey");
-
   const [exercises, setExercises] = useState([]);
   const [isExercisesShowing, setIsExercisesShowing] = useState(false);
 
   const [selectedExercise, setSelectedExercise] = useState("Pick An Exercise");
+  const [chartLabels, setChartLabels] = useState([])
   const [chartData, setChartData] = useState([])
+
+  const [isChartShowing, setIsChartShowing] = useState(false);
 
   useEffect(() => {
     db.transaction((tx) => {
@@ -62,173 +38,39 @@ export default function DisplayScreen({ navigation }) {
     });
   }, [db]);
 
-  const isStartDayValid = () => {
-    if (
-      currentStartDay.trim().length != 1 &&
-      currentStartDay.trim().length != 2
-    ) {
-      return false;
-    }
-    if (/[^0-9]/.test(currentStartDay.trim())) {
-      return false;
-    }
-    if (+currentStartDay < 1) {
-      return false;
-    }
-    if (+currentStartDay > 31) {
-      return false;
-    }
-    return true;
-  };
-
-  const isStartMonthValid = () => {
-    if (
-      currentStartMonth.trim().length != 1 &&
-      currentStartMonth.trim().length != 2
-    ) {
-      return false;
-    }
-    if (/[^0-9]/.test(currentStartMonth.trim())) {
-      return false;
-    }
-    if (+currentStartMonth < 1) {
-      return false;
-    }
-    if (+currentStartMonth > 12) {
-      return false;
-    }
-    return true;
-  };
-
-  const isStartYearValid = () => {
-    if (currentStartYear.trim().length != 4) {
-      return false;
-    }
-    if (/[^0-9]/.test(currentStartYear.trim())) {
-      return false;
-    }
-    return true;
-  };
-
-  const isEndDayValid = () => {
-    if (currentEndDay.trim().length != 1 && currentEndDay.trim().length != 2) {
-      return false;
-    }
-    if (/[^0-9]/.test(currentEndDay.trim())) {
-      return false;
-    }
-    if (+currentEndDay < 1) {
-      return false;
-    }
-    if (+currentEndDay > 31) {
-      return false;
-    }
-    return true;
-  };
-
-  const isEndMonthValid = () => {
-    if (
-      currentEndMonth.trim().length != 1 &&
-      currentEndMonth.trim().length != 2
-    ) {
-      return false;
-    }
-    if (/[^0-9]/.test(currentEndMonth.trim())) {
-      return false;
-    }
-    if (+currentEndMonth < 1) {
-      return false;
-    }
-    if (+currentEndMonth > 12) {
-      return false;
-    }
-    return true;
-  };
-
-  const isEndYearValid = () => {
-    if (currentEndYear.trim().length != 4) {
-      return false;
-    }
-    if (/[^0-9]/.test(currentEndYear.trim())) {
-      return false;
-    }
-    return true;
-  };
-
-  const isDatesValid = () => {
-    if (!isStartDayValid()) {
-      setCurrentStartDay("");
-      setCurrentStartDayPlaceholderColor("red");
-    } else {
-      setCurrentStartDayPlaceholderColor("grey");
-    }
-    if (!isStartMonthValid()) {
-      setCurrentStartMonth("");
-      setCurrentStartMonthPlaceholderColor("red");
-    } else {
-      setCurrentStartMonthPlaceholderColor("grey");
-    }
-    if (!isStartYearValid()) {
-      setCurrentStartYear("");
-      setCurrentStartYearPlaceholderColor("red");
-    } else {
-      setCurrentStartYearPlaceholderColor("grey");
-    }
-    if (!isEndDayValid()) {
-      setCurrentEndDay("");
-      setCurrentEndDayPlaceholderColor("red");
-    } else {
-      setCurrentEndDayPlaceholderColor("grey");
-    }
-    if (!isEndMonthValid()) {
-      setCurrentEndMonth("");
-      setCurrentEndMonthPlaceholderColor("red");
-    } else {
-      setCurrentEndMonthPlaceholderColor("grey");
-    }
-    if (!isEndYearValid()) {
-      setCurrentEndYear("");
-      setCurrentEndYearPlaceholderColor("red");
-    } else {
-      setCurrentEndYearPlaceholderColor("grey");
-    }
-    return (
-      isStartDayValid() &&
-      isStartMonthValid() &&
-      isStartYearValid() &&
-      isEndDayValid() &&
-      isEndMonthValid() &&
-      isEndYearValid()
-    );
-  };
-
   const handleSetSelectedExercise = (ex) => {
     setSelectedExercise(ex);
     setIsExercisesShowing(false);
   };
 
   const displayStats = () => {
-// If dates are valid and exercise data is available, create an array of objects of sets
-if(isDatesValid()){
-  db.transaction((tx) => {
-    tx.executeSql("SELECT date, weight FROM sets WHERE exercise = 'Deadlift'", [], (_, { rows }) => {
-      // Extract the rows and store them in the exercises array
-      var dataPoint = {}
-      for (let i = 0; i < rows.length; i++) {
-        dataPoint.date = rows.item(i).date;
-        dataPoint.weight = rows.item(i).weight;
-        setChartData([...chartData,dataPoint])
-      }
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT date, MAX(weight) AS max_weight FROM sets WHERE exercise = ? GROUP BY date",
+        [selectedExercise],
+        (_, { rows }) => {
+          const chartLabels = [];
+          const chartData = [];
+  
+          for (let i = 0; i < rows.length; i++) {
+            chartLabels.push(rows.item(i).date);
+            chartData.push(rows.item(i).max_weight);
+          }
+  
+          setChartLabels(chartLabels);
+          console.log(chartLabels)
+          setChartData(chartData);
+          console.log(chartData)
+          setIsChartShowing(true);
+        }
+      );
     });
-  });
-  console.log(chartData)
-};
+  };  
+  
 
-// If dates are valid but no exercise data is available, print "No data for x exercise between these dates"
-// If dates are invalid, show the error via red placeholders for the offending dates
-  };
-
-  // Display Chart on popup view with datapoint values shown at the datapoint
+  const handleBackPress = () => {
+    setIsChartShowing(false)
+  }
 
   return (
     <View style={styles.container}>
@@ -237,54 +79,7 @@ if(isDatesValid()){
           <Text style={styles.logo}>TRACK APP</Text>
         </View>
       </View>
-      <View style={styles.homePageBody}>
-        <View style={styles.inputStartDateView}>
-          <TextInput
-            style={[styles.inputStartDay]}
-            value={currentStartDay}
-            placeholder="dd"
-            placeholderTextColor={currentStartDayPlaceholderColor}
-            onChangeText={setCurrentStartDay}
-          />
-          <TextInput
-            style={styles.inputStartMonth}
-            value={currentStartMonth}
-            placeholder="mm"
-            placeholderTextColor={currentStartMonthPlaceholderColor}
-            onChangeText={setCurrentStartMonth}
-          />
-          <TextInput
-            style={styles.inputStartYear}
-            value={currentStartYear}
-            placeholder="yyyy"
-            placeholderTextColor={currentStartYearPlaceholderColor}
-            onChangeText={setCurrentStartYear}
-          />
-        </View>
-        <View style={styles.inputEndDateView}>
-          <TextInput
-            style={[styles.inputEndDay]}
-            value={currentEndDay}
-            placeholder="dd"
-            placeholderTextColor={currentEndDayPlaceholderColor}
-            onChangeText={setCurrentEndDay}
-          />
-          <TextInput
-            style={styles.inputEndMonth}
-            value={currentEndMonth}
-            placeholder="mm"
-            placeholderTextColor={currentEndMonthPlaceholderColor}
-            onChangeText={setCurrentEndMonth}
-          />
-          <TextInput
-            style={styles.inputEndYear}
-            value={currentEndYear}
-            placeholder="yyyy"
-            placeholderTextColor={currentEndYearPlaceholderColor}
-            onChangeText={setCurrentEndYear}
-          />
-        </View>
-
+      {!isChartShowing && <View style={styles.homePageBody}>
         {!isExercisesShowing && (
           <View style={styles.inputExerciseView}>
             <Pressable
@@ -314,10 +109,54 @@ if(isDatesValid()){
         )}
         <View style={styles.displayStatsView}>
           <Pressable style={styles.displayStatsButton} onPress={displayStats}>
-            <Text style={styles.displayStatsText}>Show Stats</Text>
+            <Text style={styles.displayStatsText}>Show Max Lifts</Text>
           </Pressable>
         </View>
-      </View>
+      </View>}
+      {isChartShowing && (
+        <View style={styles.homePageBody}>
+          <View style={styles.chartView}>
+            <Text style={{color: "white"}}>Max Lifts Over Time</Text>
+            <LineChart
+    data={{
+      labels: chartLabels,
+      datasets: [
+        {
+          data: chartData
+        }
+      ]
+    }}
+    width={Dimensions.get("window").width} // from react-native
+    height={220}
+    yAxisLabel="kg"
+    chartConfig={{
+      backgroundColor: "white",
+      backgroundGradientFrom: "white",
+      backgroundGradientTo: "white",
+      color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+      labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+      style: {
+        borderRadius: 16
+      },
+      propsForDots: {
+        r: "6",
+        strokeWidth: "2",
+        stroke: "#ffffff"
+      }
+    }}
+    bezier
+    style={{
+      marginVertical: 8,
+      borderRadius: 16
+    }}
+  />
+            <Pressable style={{backgroundColor: "white",
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center"}} onPress={handleBackPress}><Text style={{color: "black", fontSize: 24}}>Back</Text></Pressable>
+          </View>
+        </View>
+      )}
       <View style={styles.homePageBottom}>
         <View style={styles.contactUsView}>
           <Text style={styles.contact}>Contact Us</Text>
@@ -365,74 +204,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-evenly",
   },
-  inputStartDateView: {
-    display: "flex",
-    flexDirection: "row",
-    backgroundColor: "black",
-    width: "50%",
-    height: "10%",
-    alignItems: "center",
-    justifyContent: "space-evenly",
-  },
-  inputStartDay: {
-    width: "32%",
-    height: "100%",
-    marginRight: "2%",
-    backgroundColor: "white",
-    borderRadius: 5,
-    textAlign: "center",
-  },
-  inputStartMonth: {
-    width: "32%",
-    height: "100%",
-    backgroundColor: "white",
-    borderRadius: 5,
-    color: "black",
-    textAlign: "center",
-  },
-  inputStartYear: {
-    width: "32%",
-    height: "100%",
-    marginLeft: "2%",
-    backgroundColor: "white",
-    borderRadius: 5,
-    color: "black",
-    textAlign: "center",
-  },
-  inputEndDateView: {
-    display: "flex",
-    flexDirection: "row",
-    backgroundColor: "black",
-    width: "50%",
-    height: "10%",
-    alignItems: "center",
-    justifyContent: "space-evenly",
-  },
-  inputEndDay: {
-    width: "32%",
-    height: "100%",
-    marginRight: "2%",
-    backgroundColor: "white",
-    borderRadius: 5,
-    textAlign: "center",
-  },
-  inputEndMonth: {
-    width: "32%",
-    height: "100%",
-    backgroundColor: "white",
-    borderRadius: 5,
-    color: "black",
-    textAlign: "center",
-  },
-  inputEndYear: {
-    width: "32%",
-    height: "100%",
-    marginLeft: "2%",
-    backgroundColor: "white",
-    borderRadius: 5,
-    color: "black",
-    textAlign: "center",
-  },
   inputExerciseView: {
     height: "10%",
     width: "50%",
@@ -477,6 +248,16 @@ const styles = StyleSheet.create({
   },
   displayStatsText: {
     fontSize: 20,
+  },
+  chartView: {
+    height: "100%",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  chartText: {
+    fontSize: 36,
+    color: "white",
   },
   homePageBottom: {
     display: "flex",
