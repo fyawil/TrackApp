@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import * as SQLite from "expo-sqlite";
 import { useState, useEffect } from "react";
+import PageHeader from "../components/PageHeader"
 
 export default function RecordLiftScreen({ navigation }) {
   const db = SQLite.openDatabase("trackLog.db");
@@ -162,12 +163,8 @@ export default function RecordLiftScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.homePageTop}>
-        <View style={styles.logoView}>
-          <Text style={styles.logo}>TRACK APP</Text>
-        </View>
-      </View>
-
+      {/* Page Header */}
+      <PageHeader navigation={navigation}/>
       {showSuccessView && (
         <View style={styles.homePageBody}>
           <View style={styles.successView}>

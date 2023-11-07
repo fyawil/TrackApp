@@ -11,6 +11,7 @@ import {
 import * as SQLite from "expo-sqlite";
 import { useState, useEffect } from "react";
 import { LineChart } from 'react-native-chart-kit';
+import PageHeader from "../components/PageHeader"
 
 export default function DisplayScreen({ navigation }) {
   const db = SQLite.openDatabase("trackLog.db");
@@ -74,11 +75,8 @@ export default function DisplayScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.homePageTop}>
-        <View style={styles.logoView}>
-          <Text style={styles.logo}>TRACK APP</Text>
-        </View>
-      </View>
+      {/* Page Header */}
+      <PageHeader navigation={navigation}/>
       {!isChartShowing && <View style={styles.homePageBody}>
         {!isExercisesShowing && (
           <View style={styles.inputExerciseView}>

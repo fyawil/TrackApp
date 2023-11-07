@@ -1,37 +1,42 @@
 import React from "react";
 import { StyleSheet, Text, View, StatusBar, Pressable } from "react-native";
+import PageHeader from "../components/PageHeader"
 
 export default function RecordScreen({ navigation }) {
-  const handleRecord = () => {
-    navigation.navigate("Record"); // Navigate to the Record Screen
+  const handleRecordPress = () => {
+    // Navigate to RecordScreen
+    navigation.navigate("Record"); 
   };
 
-  const handleDisplay = () => {
-    navigation.navigate("Display"); // Navigate to the DisplayScreen
+  const handleDisplayPress = () => {
+    // Navigate to DisplayScreen
+    navigation.navigate("Display"); 
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.homePageTop}>
-        <View style={styles.logoView}>
-          <Text style={styles.logo}>TRACK APP</Text>
-        </View>
-      </View>
+      {/* Page Header */}
+      <PageHeader navigation={navigation}/>
+      {/* Page Body */}
       <View style={styles.homePageBody}>
+        {/* Record Button */}
         <View style={styles.recordButtonView}>
-          <Pressable style={styles.recordButton} onPress={handleRecord}>
+          <Pressable style={styles.recordButton} onPress={handleRecordPress}>
             <Text style={{ color: "black", fontSize: 24 }}>Record</Text>
           </Pressable>
         </View>
+        {/* Or Text */}
         <View style={styles.orView}>
           <Text style={{ color: "white", fontSize: 24 }}>Or</Text>          
         </View>
+        {/* Display Button */}
         <View style={styles.displayButtonView}>
-          <Pressable style={styles.displayButton} onPress={handleDisplay}>
+          <Pressable style={styles.displayButton} onPress={handleDisplayPress}>
             <Text style={{ color: "black", fontSize: 24}}>Display</Text>
           </Pressable>
         </View>
       </View>
+      {/* Page Footer */}
       <View style={styles.homePageBottom}>
         <View style={styles.contactUsView}>
           <Text style={styles.contact}>Contact Us</Text>
