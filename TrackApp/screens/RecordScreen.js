@@ -4,124 +4,53 @@ import {
   StatusBar,
   Pressable,
   View,
-  TextInput
+  TextInput,
 } from "react-native";
 import * as SQLite from "expo-sqlite";
 import { useState, useEffect } from "react";
-import PageHeader from "../components/PageHeader"
+import PageHeader from "../components/PageHeader";
+import PageFooter from "../components/PageFooter";
+import isSetValid from "../functions/isSetValid";
 
 export default function RecordLiftScreen({ navigation }) {
   const db = SQLite.openDatabase("trackLog.db");
-  const [isLoading, setIsLoading] = useState(true);
 
-  date = new Date().toLocaleDateString()
+  // Set currentDate to today's date in user's local format
+  date = new Date().toLocaleDateString();
   const [currentDate, setCurrentDate] = useState(`${date}`);
-
+  // Create sets exercise name variable (currentExercise) and make its input field placeholder font color grey
   const [currentExercise, setCurrentExercise] = useState("");
   const [currentExercisePlaceholderColor, setCurrentExercisePlaceholderColor] =
     useState("grey");
-
+  // Create sets added weight variable (currentWeight) and make its input field placeholder font color grey
   const [currentWeight, setCurrentWeight] = useState("");
   const [currentWeightPlaceholderColor, setCurrentWeightPlaceholderColor] =
     useState("grey");
-
+  // Create sets rep number variable (currentReps) and make its input field placeholder font color grey
   const [currentReps, setCurrentReps] = useState("");
   const [currentRepsPlaceholderColor, setCurrentRepsPlaceholderColor] =
     useState("grey");
 
+  // Initialise the confirmation message of set being completed as hidden, so success message is not shown initially
   const [showSuccessView, setShowSuccessView] = useState(false);
 
-  useEffect(() => { 
-
+  // Create the database if it does not exist when screen loads
+  useEffect(() => {
     db.transaction((tx) => {
       tx.executeSql(
         "CREATE TABLE IF NOT EXISTS sets (id INTEGER PRIMARY KEY AUTOINCREMENT, date DATE, exercise TEXT, weight REAL, reps INTEGER)"
       );
     });
-
-    setIsLoading(false);
   }, [db]);
 
-  if (isLoading) {
-    return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
-      </View>
-    );
-  }
-
-  const isExerciseValid = () => {
-    if (/[^A-Za-z]/.test(currentExercise.trim())) {
-      return false;
-    }
-    if (
-      currentExercise.trim().length < 3 ||
-      currentExercise.trim().length > 50
-    ) {
-      return false;
-    }
-    return true;
-  };
-
-  const isWeightValid = () => {
-    if (!/^\d+(\.\d+)?$/.test(currentWeight.trim())) {
-      return false;
-    }
-    return true;
-  };
-
-  const isRepsValid = () => {
-    if (currentReps.trim() == "") {
-      return false;
-    }
-    if (/[^0-9]/.test(currentReps.trim())) {
-      return false;
-    }
-    if (+currentReps < 0) {
-      return false;
-    }
-    return true;
-  };
-
-  const isSetValid = () => {
-    if (!isExerciseValid()) {
-      setCurrentExercise("");
-      setCurrentExercisePlaceholderColor("red");
-    } else {
-      setCurrentExercisePlaceholderColor("grey");
-    }
-    if (!isWeightValid()) {
-      setCurrentWeight("");
-      setCurrentWeightPlaceholderColor("red");
-    } else {
-      setCurrentWeightPlaceholderColor("grey");
-    }
-    if (!isRepsValid()) {
-      setCurrentReps("");
-      setCurrentRepsPlaceholderColor("red");
-    } else {
-      setCurrentRepsPlaceholderColor("grey");
-    }
-
-    return (
-      isExerciseValid() &&
-      isWeightValid() &&
-      isRepsValid()
-    );
-  };
-
+  // Add set to db and reset all input field and display success message if all inputs are valid
   const addSet = () => {
-    if (isSetValid()) {
+    if (isSetValid(currentExercise, currentWeight, currentReps)) {
       db.transaction(
         (tx) => {
           tx.executeSql(
             "INSERT INTO sets (date, exercise, weight, reps) VALUES (?, ?, ?, ?)",
-            [
-              currentDate,
-              currentExercise,
-              currentWeight,
-              currentReps,
-            ],
+            [currentDate, currentExercise, currentWeight, currentReps],
             (_, { insertId }) => {
               // Data inserted successfully, you can clear the input fields here
               setCurrentExercise("");
@@ -133,29 +62,16 @@ export default function RecordLiftScreen({ navigation }) {
         },
         null,
         () => {
-          // After successful insertion, log the data
-          db.transaction(
-            (tx) => {
-              tx.executeSql("SELECT * FROM sets", [], (_, { rows }) => {
-                const data = rows._array;
-                console.log(data); // Log the data /////////////////////////////////////////////////////
-              });
-            },
-            null,
-            () => {}
-          );
+          // After successful insertion, display success message
           displaySuccessMessage();
         }
       );
-    } else {
-      console.log("Invalid Set");
     }
   };
 
   const displaySuccessMessage = () => {
     setShowSuccessView(true);
 
-    // Hide the view after 3 seconds
     setTimeout(() => {
       setShowSuccessView(false);
     }, 3000);
@@ -163,17 +79,11 @@ export default function RecordLiftScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Page Header */}
-      <PageHeader navigation={navigation}/>
-      {showSuccessView && (
-        <View style={styles.homePageBody}>
-          <View style={styles.successView}>
-            <Text style={styles.successText}>Set complete!</Text>
-          </View>
-        </View>
-      )}
+      <PageHeader navigation={navigation} />
+      {/* Workout Set Details Input Form */}
       {!showSuccessView && (
         <View style={styles.homePageBody}>
+          {/* Workout Sets Exercise Name Input */}
           <TextInput
             style={styles.inputExercise}
             value={currentExercise}
@@ -181,6 +91,7 @@ export default function RecordLiftScreen({ navigation }) {
             placeholderTextColor={currentExercisePlaceholderColor}
             onChangeText={setCurrentExercise}
           />
+          {/* Workout Sets Added Weight Input */}
           <TextInput
             style={styles.inputWeight}
             value={currentWeight}
@@ -188,6 +99,7 @@ export default function RecordLiftScreen({ navigation }) {
             placeholderTextColor={currentWeightPlaceholderColor}
             onChangeText={setCurrentWeight}
           />
+          {/* Workout Sets Rep Number Input */}
           <TextInput
             style={styles.inputReps}
             value={currentReps}
@@ -195,16 +107,21 @@ export default function RecordLiftScreen({ navigation }) {
             placeholderTextColor={currentRepsPlaceholderColor}
             onChangeText={setCurrentReps}
           />
+          {/* Button To Add Set To local DB */}
           <Pressable style={styles.addSetButton} onPress={addSet}>
-            <Text style={{ textAlign: "center", fontSize: 24 }}>+</Text>
+            <Text style={{ textAlign: "center", fontSize: 24 }}>Add Set</Text>
           </Pressable>
         </View>
       )}
-      <View style={styles.homePageBottom}>
-        <View style={styles.contactUsView}>
-          <Text style={styles.contact}>Contact Us</Text>
+      {/* 3-Second Success Message Displayed After DB Insertion of Set */}
+      {showSuccessView && (
+        <View style={styles.homePageBody}>
+          <View style={styles.successView}>
+            <Text style={styles.successText}>Set complete!</Text>
+          </View>
         </View>
-      </View>
+      )}
+      <PageFooter navigation={navigation} previousScreen="Home" />
       <StatusBar style="auto" />
     </View>
   );
@@ -223,20 +140,6 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     justifyContent: "space-between",
     margin: 8,
-  },
-  homePageTop: {
-    display: "flex",
-    flexDirection: "row",
-    backgroundColor: "white",
-    height: "10%",
-  },
-  logoView: {
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  logo: {
-    fontSize: 24,
   },
   homePageBody: {
     display: "flex",
@@ -286,20 +189,5 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 5,
     justifyContent: "center",
-  },
-  homePageBottom: {
-    display: "flex",
-    flexDirection: "row",
-    backgroundColor: "white",
-    height: "10%",
-  },
-  contactUsView: {
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  contact: {
-    fontSize: 24,
-    textDecorationLine: "line-through",
   },
 });

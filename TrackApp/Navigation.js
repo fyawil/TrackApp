@@ -4,7 +4,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 // Import your screens here
 import HomeScreen from './screens/HomeScreen';
-import RecordOrDisplayScreen from './screens/RecordOrDisplayScreen';
 import RecordScreen from './screens/RecordScreen';
 import DisplayScreen from './screens/DisplayScreen';
 
@@ -17,7 +16,6 @@ export default function Navigation() {
     headerShown: false
   }}>
         <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="RecordOrDisplay" component={RecordOrDisplayScreen} />
         <Stack.Screen name="Record" component={RecordScreen} />
         <Stack.Screen name="Display" component={DisplayScreen} />
       </Stack.Navigator>
