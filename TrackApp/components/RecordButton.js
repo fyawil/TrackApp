@@ -28,6 +28,7 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: 5,
   },
   recordButtonText: { 
     color: "black", 

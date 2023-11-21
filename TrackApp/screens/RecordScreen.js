@@ -10,14 +10,17 @@ import * as SQLite from "expo-sqlite";
 import { useState, useEffect } from "react";
 import PageHeader from "../components/PageHeader";
 import PageFooter from "../components/PageFooter";
-import isSetValid from "../functions/isSetValid";
 
 export default function RecordLiftScreen({ navigation }) {
   const db = SQLite.openDatabase("trackLog.db");
 
-  // Set currentDate to today's date in user's local format
+  // Create sets exercise name variable (currentExercise) and make its input field placeholder font color grey and set currentDate to 
+  // today's date in user's local format 
   date = new Date().toLocaleDateString();
   const [currentDate, setCurrentDate] = useState(`${date}`);
+  const [currentDatePlaceholderColor, setCurrentDatePlaceholderColor] =
+  useState("grey");
+
   // Create sets exercise name variable (currentExercise) and make its input field placeholder font color grey
   const [currentExercise, setCurrentExercise] = useState("");
   const [currentExercisePlaceholderColor, setCurrentExercisePlaceholderColor] =
@@ -43,9 +46,89 @@ export default function RecordLiftScreen({ navigation }) {
     });
   }, [db]);
 
+  // Check if sets exercise name input is valid
+  const isDateValid = (date) => {
+    // let date_in_ISO = date.split("/").reverse().join("/")
+    // if(new Date(date_in_ISO) == "Invalid Date"){
+    //   return false
+    // }
+    return true
+  };
+
+  // Check if sets exercise name input is valid
+  const isExerciseValid = (exercise) => {
+    if (/[^A-Za-z]/.test(exercise.trim())) {
+      return false;
+    }
+    if (
+      exercise.trim().length < 3 ||
+      exercise.trim().length > 50
+    ) {
+      return false;
+    }
+    return true;
+  };
+
+    // Check if sets added weight input is valid
+    const isWeightValid = (weight) => {
+      if (!/^\d+(\.\d+)?$/.test(weight.trim())) {
+        return false;
+      }
+      return true;
+    };
+
+      // Check if sets reps number input is valid
+  const isRepsValid = (reps) => {
+    if (reps.trim() == "") {
+      return false;
+    }
+    if (/[^0-9]/.test(reps.trim())) {
+      return false;
+    }
+    if (+reps < 0) {
+      return false;
+    }
+    return true;
+  };
+  
+  // Check if sets inputs are all valid and set placeholder font color of any invalid inputs to red
+  function isSetValid (date, exercise, weight, reps) {
+    if (!isDateValid(date)) {
+      setCurrentDate("");
+      setCurrentDatePlaceholderColor("red");
+    } else {
+      setCurrentDatePlaceholderColor("grey");
+    }
+    if (!isExerciseValid(exercise)) {
+      setCurrentExercise("");
+      setCurrentExercisePlaceholderColor("red");
+    } else {
+      setCurrentExercisePlaceholderColor("grey");
+    }
+    if (!isWeightValid(weight)) {
+      setCurrentWeight("");
+      setCurrentWeightPlaceholderColor("red");
+    } else {
+      setCurrentWeightPlaceholderColor("grey");
+    }
+    if (!isRepsValid(reps)) {
+      setCurrentReps("");
+      setCurrentRepsPlaceholderColor("red");
+    } else {
+      setCurrentRepsPlaceholderColor("grey");
+    }
+
+    return (
+      isDateValid(date) &&
+      isExerciseValid(exercise) &&
+      isWeightValid(weight) &&
+      isRepsValid(reps)
+    );
+  };
+
   // Add set to db and reset all input field and display success message if all inputs are valid
   const addSet = () => {
-    if (isSetValid(currentExercise, currentWeight, currentReps)) {
+    if (isSetValid(currentDate, currentExercise, currentWeight, currentReps)) {
       db.transaction(
         (tx) => {
           tx.executeSql(
@@ -83,6 +166,14 @@ export default function RecordLiftScreen({ navigation }) {
       {/* Workout Set Details Input Form */}
       {!showSuccessView && (
         <View style={styles.homePageBody}>
+          {/* Workout Sets Date Input */}
+          <TextInput
+            style={styles.inputDate}
+            value={currentDate}
+            placeholder="dd/mm/yyyy"
+            placeholderTextColor={currentDatePlaceholderColor}
+            onChangeText={setCurrentDate}
+          />
           {/* Workout Sets Exercise Name Input */}
           <TextInput
             style={styles.inputExercise}
@@ -159,6 +250,14 @@ const styles = StyleSheet.create({
   successText: {
     fontSize: 36,
     color: "white",
+  },
+  inputDate: {
+    width: "50%",
+    height: "10%",
+    backgroundColor: "white",
+    borderRadius: 5,
+    color: "black",
+    textAlign: "center",
   },
   inputExercise: {
     width: "50%",

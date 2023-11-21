@@ -45,6 +45,7 @@ export default function DisplayScreen({ navigation }) {
   };
 
   const displayStats = () => {
+    if(selectedExercise != "Pick An Exercise"){
     db.transaction((tx) => {
       tx.executeSql(
         "SELECT date, MAX(weight) AS max_weight FROM sets WHERE exercise = ? GROUP BY date",
@@ -63,7 +64,8 @@ export default function DisplayScreen({ navigation }) {
           setIsChartShowing(true);
         }
       );
-    });
+    });      
+    }
   };
 
   const handleBackToStatsSelection = () => {
@@ -127,7 +129,7 @@ export default function DisplayScreen({ navigation }) {
               }}
               width={Dimensions.get("window").width} // from react-native
               height={220}
-              yAxisLabel="kg"
+              yAxisSuffix="kg"
               chartConfig={{
                 backgroundColor: "white",
                 backgroundGradientFrom: "white",
