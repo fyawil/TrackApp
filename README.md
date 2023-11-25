@@ -22,9 +22,9 @@ An app that allows a person to log their physical training, and display the stat
 
 1. Clone the repository
 
-   ```bash
-   git clone https://github.com/fyawil/TrackApp.git
-   ```
+```bash
+git clone https://github.com/fyawil/TrackApp.git
+```
    
 2. Navigate to the project folder
 
