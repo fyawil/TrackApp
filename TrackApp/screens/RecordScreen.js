@@ -16,8 +16,12 @@ export default function RecordLiftScreen({ navigation }) {
 
   // Create sets exercise name variable (currentExercise) and make its input field placeholder font color grey and set currentDate to 
   // today's date in user's local format 
-  date = new Date().toLocaleDateString();
-  const [currentDate, setCurrentDate] = useState(`${date}`);
+  let today = new Date();
+  const dd = String(today.getDate()).padStart(2, '0');
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const yyyy = today.getFullYear();
+
+  const [currentDate, setCurrentDate] = useState(`${dd}/${mm}/${yyyy}`);
   const [currentDatePlaceholderColor, setCurrentDatePlaceholderColor] =
   useState("grey");
 
@@ -47,22 +51,24 @@ export default function RecordLiftScreen({ navigation }) {
   }, [db]);
 
   // Check if sets exercise name input is valid
-  const isDateValid = (date) => {
-    // let date_in_ISO = date.split("/").reverse().join("/")
-    // if(new Date(date_in_ISO) == "Invalid Date"){
-    //   return false
-    // }
-    return true
-  };
+  const isDateValid = () => {
+    const [day, month, year] = currentDate.split("/").map(Number);
+    const parsedDate = new Date(year, month - 1, day); // Month is 0-based in JavaScript Dates
+  
+    if (isNaN(parsedDate.getTime())) {
+      return false;
+    }
+    return true;
+  };  
 
   // Check if sets exercise name input is valid
-  const isExerciseValid = (exercise) => {
-    if (/[^A-Za-z]/.test(exercise.trim())) {
+  const isExerciseValid = () => {
+    if (/[^A-Za-z]/.test(currentExercise.trim())) {
       return false;
     }
     if (
-      exercise.trim().length < 3 ||
-      exercise.trim().length > 50
+      currentExercise.trim().length < 3 ||
+      currentExercise.trim().length > 50
     ) {
       return false;
     }
@@ -70,48 +76,48 @@ export default function RecordLiftScreen({ navigation }) {
   };
 
     // Check if sets added weight input is valid
-    const isWeightValid = (weight) => {
-      if (!/^\d+(\.\d+)?$/.test(weight.trim())) {
+    const isWeightValid = () => {
+      if (!/^\d+(\.\d+)?$/.test(currentWeight.trim())) {
         return false;
       }
       return true;
     };
 
       // Check if sets reps number input is valid
-  const isRepsValid = (reps) => {
-    if (reps.trim() == "") {
+  const isRepsValid = () => {
+    if (currentReps.trim() == "") {
       return false;
     }
-    if (/[^0-9]/.test(reps.trim())) {
+    if (/[^0-9]/.test(currentReps.trim())) {
       return false;
     }
-    if (+reps < 0) {
+    if (+currentReps < 0) {
       return false;
     }
     return true;
   };
   
   // Check if sets inputs are all valid and set placeholder font color of any invalid inputs to red
-  function isSetValid (date, exercise, weight, reps) {
-    if (!isDateValid(date)) {
+  function isSetValid () {
+    if (!isDateValid()) {
       setCurrentDate("");
       setCurrentDatePlaceholderColor("red");
     } else {
       setCurrentDatePlaceholderColor("grey");
     }
-    if (!isExerciseValid(exercise)) {
+    if (!isExerciseValid()) {
       setCurrentExercise("");
       setCurrentExercisePlaceholderColor("red");
     } else {
       setCurrentExercisePlaceholderColor("grey");
     }
-    if (!isWeightValid(weight)) {
+    if (!isWeightValid()) {
       setCurrentWeight("");
       setCurrentWeightPlaceholderColor("red");
     } else {
       setCurrentWeightPlaceholderColor("grey");
     }
-    if (!isRepsValid(reps)) {
+    if (!isRepsValid()) {
       setCurrentReps("");
       setCurrentRepsPlaceholderColor("red");
     } else {
@@ -119,16 +125,16 @@ export default function RecordLiftScreen({ navigation }) {
     }
 
     return (
-      isDateValid(date) &&
-      isExerciseValid(exercise) &&
-      isWeightValid(weight) &&
-      isRepsValid(reps)
+      isDateValid() &&
+      isExerciseValid() &&
+      isWeightValid() &&
+      isRepsValid()
     );
   };
 
   // Add set to db and reset all input field and display success message if all inputs are valid
   const addSet = () => {
-    if (isSetValid(currentDate, currentExercise, currentWeight, currentReps)) {
+    if (isSetValid()) {
       db.transaction(
         (tx) => {
           tx.executeSql(

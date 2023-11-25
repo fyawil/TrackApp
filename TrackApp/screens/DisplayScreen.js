@@ -20,6 +20,7 @@ export default function DisplayScreen({ navigation }) {
   const [isExercisesShowing, setIsExercisesShowing] = useState(false);
 
   const [selectedExercise, setSelectedExercise] = useState("Pick An Exercise");
+  const [chartType, setChartType] = useState("");
   const [chartLabels, setChartLabels] = useState([]);
   const [chartData, setChartData] = useState([]);
 
@@ -44,8 +45,9 @@ export default function DisplayScreen({ navigation }) {
     setIsExercisesShowing(false);
   };
 
-  const displayStats = () => {
+  const displayMaxWeightPerDay = () => {
     if(selectedExercise != "Pick An Exercise"){
+      setChartType("Max Weight Lifted Over Time");
     db.transaction((tx) => {
       tx.executeSql(
         "SELECT date, MAX(weight) AS max_weight FROM sets WHERE exercise = ? GROUP BY date",
@@ -68,6 +70,56 @@ export default function DisplayScreen({ navigation }) {
     }
   };
 
+  const displayVolumePerDay = () => {
+    if(selectedExercise != "Pick An Exercise"){
+      setChartType("Volume Over Time");
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT date, SUM(weight * reps) AS volume_of_date FROM sets WHERE exercise = ? GROUP BY date",
+        [selectedExercise],
+        (_, { rows }) => {
+          const chartLabels = [];
+          const chartData = [];
+
+          for (let i = 0; i < rows.length; i++) {
+            chartLabels.push(rows.item(i).date);
+            chartData.push(rows.item(i).volume_of_date);
+          }
+
+          setChartLabels(chartLabels);
+          setChartData(chartData);
+          setIsChartShowing(true);
+        }
+      );
+    });      
+    }
+  };
+
+    const displayMaxRepsPerDay = () => {
+    if(selectedExercise != "Pick An Exercise"){
+      setChartType("Max Reps in A Set Over Time");
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT date, MAX(reps) AS max_reps FROM sets WHERE exercise = ? GROUP BY date",
+        [selectedExercise],
+        (_, { rows }) => {
+          const chartLabels = [];
+          const chartData = [];
+
+          for (let i = 0; i < rows.length; i++) {
+            chartLabels.push(rows.item(i).date);
+            chartData.push(rows.item(i).max_reps);
+          }
+
+          setChartLabels(chartLabels);
+          setChartData(chartData);
+          setIsChartShowing(true);
+        }
+      );
+    });      
+    }
+  };
+
   const handleBackToStatsSelection = () => {
     setIsChartShowing(false);
   };
@@ -79,6 +131,7 @@ export default function DisplayScreen({ navigation }) {
       {!isChartShowing && (
         <View style={styles.homePageBody}>
           {!isExercisesShowing && (
+            <View style={styles.inputExerciseBrick}>
             <View style={styles.inputExerciseView}>
               <Pressable
                 value={true}
@@ -89,9 +142,11 @@ export default function DisplayScreen({ navigation }) {
                   style={styles.inputExerciseText}
                 >{`${selectedExercise}`}</Text>
               </Pressable>
+            </View>              
             </View>
           )}
           {isExercisesShowing && (
+            <View style={styles.inputExerciseBrick}>
             <ScrollView
               style={styles.selectExerciseScrollView}
               showsVerticalScrollIndicator={true}
@@ -106,18 +161,33 @@ export default function DisplayScreen({ navigation }) {
                 </Pressable>
               ))}
             </ScrollView>
+            </View>
           )}
+          <View style={styles.topTwoStats}>
           <View style={styles.displayStatsView}>
-            <Pressable style={styles.displayStatsButton} onPress={displayStats}>
+            <Pressable style={styles.displayStatsButton} onPress={displayMaxWeightPerDay}>
               <Text style={styles.displayStatsText}>Show Max Lifts</Text>
             </Pressable>
           </View>
+          <View style={styles.displayStatsView}>
+            <Pressable style={styles.displayStatsButton} onPress={displayVolumePerDay}>
+              <Text style={styles.displayStatsText}>Show Volume</Text>
+            </Pressable>
+          </View>
+        </View>
+        <View style={styles.bottomTwoStats}>
+          <View style={styles.displayStatsView}>
+            <Pressable style={styles.displayStatsButton} onPress={displayMaxRepsPerDay}>
+              <Text style={styles.displayStatsText}>Show Max Lifts</Text>
+            </Pressable>
+          </View>
+        </View>
         </View>
       )}
       {isChartShowing && (
         <View style={styles.homePageBody}>
           <View style={styles.chartView}>
-            <Text style={{ color: "white" }}>Max Lifts Over Time</Text>
+            <Text style={{ color: "white" }}>{chartType}</Text>
             <LineChart
               data={{
                 labels: chartLabels,
@@ -127,9 +197,9 @@ export default function DisplayScreen({ navigation }) {
                   },
                 ],
               }}
-              width={Dimensions.get("window").width} // from react-native
-              height={220}
-              yAxisSuffix="kg"
+              width={Dimensions.get("window").width * 0.9} // from react-native
+              height={Dimensions.get("window").height * 0.7}
+              verticalLabelRotation={45}
               chartConfig={{
                 backgroundColor: "white",
                 backgroundGradientFrom: "white",
@@ -150,6 +220,7 @@ export default function DisplayScreen({ navigation }) {
                 marginVertical: 8,
                 borderRadius: 16,
               }}
+              withShadow={false}
             />
           </View>
         </View>
@@ -192,8 +263,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-evenly",
   },
+  inputExerciseBrick: {
+    display: "flex",
+    flexDirection: "column",
+    height: "34%",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "space-evenly",
+  },
   inputExerciseView: {
-    height: "10%",
+    height: "34%",
     width: "50%",
     alignItems: "center",
     justifyContent: "center",
@@ -210,7 +289,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   selectExerciseScrollView: {
-    maxHeight: "20%",
+    maxHeight: "90%",
     width: "50%",
     backgroundColor: "white",
   },
@@ -222,9 +301,25 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: "center",
   },
+  topTwoStats: {
+    display: "flex",
+    flexDirection: "row",
+    height: "33%",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "space-evenly",
+  },
+  bottomTwoStats: {
+    display: "flex",
+    flexDirection: "row",
+    height: "33%",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "space-evenly",
+  },
   displayStatsView: {
-    height: "10%",
-    width: "50%",
+    height: "90%",
+    width: "45%",
     alignItems: "center",
     justifyContent: "center",
   },
