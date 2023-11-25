@@ -26,7 +26,7 @@ An app that allows a person to log their physical training, and display the stat
    git clone https://github.com/fyawil/TrackApp.git
 Navigate to the project folder
 
-bash
+```bash
 
 Copy code
 
@@ -34,7 +34,7 @@ cd TrackApp
 
 Install dependencies
 
-bash
+```bash
 
 Copy code
 
@@ -42,7 +42,7 @@ npm install
 
 Start the development server
 
-bash
+```bash
 
 Copy code
 
@@ -50,13 +50,13 @@ expo start
 
 Follow the instructions to open the app on an emulator or physical device.
 
-##Usage
+## Usage
 
 Click Record to record a set of an exercise
 
 Click Display to display stats on your workouts over time
 
-##Contributing
+## Contributing
 
 If you'd like to contribute to the project, please follow the Contributing Guidelines.
 
