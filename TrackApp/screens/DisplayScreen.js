@@ -178,7 +178,7 @@ export default function DisplayScreen({ navigation }) {
         <View style={styles.bottomTwoStats}>
           <View style={styles.displayStatsView}>
             <Pressable style={styles.displayStatsButton} onPress={displayMaxRepsPerDay}>
-              <Text style={styles.displayStatsText}>Show Max Lifts</Text>
+              <Text style={styles.displayStatsText}>Show Max Reps</Text>
             </Pressable>
           </View>
         </View>
