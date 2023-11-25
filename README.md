@@ -25,28 +25,21 @@ An app that allows a person to log their physical training, and display the stat
    ```bash
    git clone https://github.com/fyawil/TrackApp.git
    ```
+   
 2. Navigate to the project folder
 
-```bash
-   
-   Copy code
-   
+```bash 
    cd TrackApp
 ```
+
 3. Install dependencies
 
 ```bash
-
-Copy code
-
 npm install
+```
 
 4. Start the development server
-```
 ```bash
-
-Copy code
-
 expo start
 ```
 
